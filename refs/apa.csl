@@ -1,1 +1,8 @@
-
+<!-- Download the real file from https://www.zotero.org/styles and replace this placeholder. -->
+<!-- Example: APA 7th edition (note: this placeholder prevents CI errors if you commit before replacing). -->
+<style xmlns="http://purl.org/net/xbiblio/csl" version="1.0">
+  <info><title>APA (placeholder)</title><id>apa-placeholder</id></info>
+  <locale xml:lang="en"/>
+  <citation><layout><text value="(citation placeholder)"/></layout></citation>
+  <bibliography><layout><text value="bibliography placeholder"/></layout></bibliography>
+</style>
