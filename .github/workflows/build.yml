@@ -18,6 +18,26 @@ jobs:
         with:
           version: '3.1.11'
 
+      - name: Prepare includes
+        run: |
+          mkdir -p build/includes
+          # Banner on the main review page
+          cat > build/includes/review-nav.html <<'HTML'
+          <nav style="background:#f6f8fa;border-bottom:1px solid #e5e7eb;padding:12px 16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+            <a href="./notes-html/index.html" style="text-decoration:none;font-weight:600">Reading notes</a>
+          </nav>
+          HTML
+          # Top link on note pages
+          cat > build/includes/note-nav.html <<'HTML'
+          <nav style="background:#f6f8fa;border-bottom:1px solid #e5e7eb;padding:12px 16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+            <a href="../review.html" style="text-decoration:none">← Back to Literature Review</a>
+            &nbsp;&middot;&nbsp;
+            <a href="./index.html" style="text-decoration:none">All notes</a>
+          </nav>
+          HTML
+          # Footer with last-updated
+          echo "<footer style='margin-top:2rem;padding-top:1rem;border-top:1px solid #ddd;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:0.9rem;color:#555;'>Last updated $(date '+%d %B %Y')</footer>" > build/includes/footer.html
+
       - name: Build review.html
         run: |
           mkdir -p build
@@ -30,10 +50,13 @@ jobs:
             --metadata reference-section-title="References" \
             --metadata link-citations=true \
             --metadata title="Literature Review" \
+            --metadata date="Last updated $(date '+%d %B %Y')" \
             --standalone \
+            --include-before-body=build/includes/review-nav.html \
+            --include-after-body=build/includes/footer.html \
             -o build/review.html
 
-      - name: Build reading notes -> HTML
+      - name: Build reading notes → HTML
         run: |
           mkdir -p build/notes-html
           shopt -s nullglob
@@ -45,15 +68,10 @@ jobs:
               --from=markdown \
               --to=html5 \
               --standalone \
+              --metadata date="Last updated $(date '+%d %B %Y')" \
+              --include-before-body=build/includes/note-nav.html \
+              --include-after-body=build/includes/footer.html \
               -o "$out"
-          done
-
-      - name: Add last updated footer
-        run: |
-          FOOTER="<footer style='margin-top:2rem;padding-top:1rem;border-top:1px solid #ddd;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:0.9rem;color:#555;'>Last updated $(date '+%d %B %Y')</footer>"
-          for f in build/*.html build/notes-html/*.html; do
-            [ -f "$f" ] || continue
-            sed -i 's|</body>|'"$FOOTER"'\n</body>|' "$f"
           done
 
       - name: Create notes index
@@ -62,24 +80,20 @@ jobs:
           mkdir -p "$NOTES_DIR"
           {
             echo "<!doctype html><meta charset='utf-8'><title>Reading Notes</title>"
-            echo "<main style='max-width:860px;margin:2rem auto;font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif'>"
+            echo "<main style='max-width:860px;margin:2rem auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif'>"
             echo "<h1 style='margin-bottom:1rem'>Reading Notes</h1><ul>"
             for f in "$NOTES_DIR"/*.html; do
               [ -e "$f" ] || continue
-              title=$(sed -n 's/.*<title>\(.*\)<\/title>.*/\1/p' "$f" | head -1)
               file=$(basename "$f")
-              if [ -z "$title" ]; then title="${file%.html}"; fi
+              [ "$file" = "index.html" ] && continue
+              title=$(sed -n 's/.*<title>\(.*\)<\/title>.*/\1/p' "$f" | head -1)
+              [ -z "$title" ] && title="${file%.html}"
               echo "<li><a href='./$file'>$title</a></li>"
             done
             echo "</ul>"
             echo "<p style='margin-top:2rem'><a href='../review.html'>&larr; Back to Literature Review</a></p>"
             echo "</main>"
           } > "$NOTES_DIR/index.html"
-
-      - name: Link notes from review.html
-        run: |
-          NAV='<nav style="background:#f6f8fa;border-bottom:1px solid #e5e7eb;padding:12px 16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif"><a href="./notes-html/index.html" style="text-decoration:none;font-weight:600">Reading notes</a></nav>'
-          sed -i '0,/<body[^>]*>/s//&\n'"$NAV"'/' build/review.html || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
