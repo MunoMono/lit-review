@@ -1,16 +1,8 @@
 ---
-
-### `notes/review.md`
-```markdown
----
 title: "Literature Review on <Topic>"
 author: "Your Name"
-date: "<Month Year>"
+date: "August 2025"
 ---
-
-# Abstract
-
-Brief overview of scope, methods (search strategy), and key findings.
 
 # Introduction
 
