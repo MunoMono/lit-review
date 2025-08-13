@@ -1,1 +1,63 @@
+name: Build literature review
 
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pandoc
+        uses: pandoc/actions/setup@v1
+        with:
+          version: '3.1.11'
+
+      - name: Build HTML
+        run: |
+          mkdir -p build
+          pandoc notes/review.md \
+            --from=gfm \
+            --to=html5 \
+            --citeproc \
+            --bibliography=refs/library.bib \
+            --csl=refs/apa.csl \
+            --standalone \
+            --metadata title="Literature Review" \
+            -o build/review.html
+
+      - name: Build DOCX
+        run: |
+          pandoc notes/review.md \
+            --citeproc \
+            --bibliography=refs/library.bib \
+            --csl=refs/apa.csl \
+            -o build/lit-review.docx
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lit-review-build
+          path: build
+
+  deploy:
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: lit-review-build
+          path: build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+      - uses: actions/deploy-pages@v4
