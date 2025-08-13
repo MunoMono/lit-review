@@ -1,7 +1,6 @@
 ---
 title: "Literature Review on <Topic>"
 author: "Graham Newman"
-date: "August 2025"
 ---
 
 # Introduction
