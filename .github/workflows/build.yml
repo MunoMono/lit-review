@@ -1,4 +1,4 @@
-name: Build literature review
+name: Build Literature Review
 
 on:
   push:
@@ -8,24 +8,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Pandoc
+      - name: Set up Pandoc
         uses: pandoc/actions/setup@v1
         with:
           version: '3.1.11'
+
+      - name: Install LaTeX (for PDF)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-latex-recommended \
+            texlive-latex-extra
 
       - name: Build HTML
         run: |
           mkdir -p build
           pandoc notes/review.md \
-            --from=gfm \
+            --from=markdown \
             --to=html5 \
             --citeproc \
             --bibliography=refs/library.bib \
             --csl=refs/apa.csl \
+            --metadata reference-section-title="References" \
+            --metadata link-citations=true \
             --standalone \
             --metadata title="Literature Review" \
             -o build/review.html
@@ -33,16 +45,31 @@ jobs:
       - name: Build DOCX
         run: |
           pandoc notes/review.md \
+            --from=markdown \
             --citeproc \
             --bibliography=refs/library.bib \
             --csl=refs/apa.csl \
+            --metadata reference-section-title="References" \
+            --metadata link-citations=true \
             -o build/lit-review.docx
+
+      - name: Build PDF
+        run: |
+          pandoc notes/review.md \
+            --from=markdown \
+            --pdf-engine=xelatex \
+            --citeproc \
+            --bibliography=refs/library.bib \
+            --csl=refs/apa.csl \
+            --metadata reference-section-title="References" \
+            --metadata link-citations=true \
+            -o build/lit-review.pdf
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: lit-review-build
-          path: build
+          path: build/
 
   deploy:
     needs: build
@@ -52,12 +79,16 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
           name: lit-review-build
           path: build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: build
-      - uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
