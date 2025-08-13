@@ -37,5 +37,3 @@ Identify underexplored areas, conflicting evidence, open questions.
 # Conclusion
 
 Concise summary of what is known/unknown and implications.
-
-# References
