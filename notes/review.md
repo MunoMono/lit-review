@@ -1,6 +1,6 @@
 ---
 title: "Literature Review on <Topic>"
-author: "Your Name"
+author: "Graham Newman"
 date: "August 2025"
 ---
 
@@ -8,14 +8,14 @@ date: "August 2025"
 
 Context, importance, and aims of the review. Prior work shows … [@Smith2020; @Lee2018].
 
-# Search Strategy and Inclusion Criteria
+# Search strategy and inclusion criteria
 
 - Databases: Scopus, Web of Science, etc.
 - Keywords:
 - Inclusion/Exclusion:
 - Timeframe:
 
-# Thematic Synthesis
+# Thematic synthesis
 
 ## Theme 1: <Name>
 - Key evidence: [@Smith2020]
@@ -26,11 +26,11 @@ Context, importance, and aims of the review. Prior work shows … [@Smith2020; @
 - Key evidence:
 - Synthesis:
 
-# Methodological Appraisal
+# Methodological appraisal
 
 Assess quality, bias, sample sizes, instruments, stats, replication, etc.
 
-# Gaps and Future Directions
+# Gaps and future directions
 
 Identify underexplored areas, conflicting evidence, open questions.
 
