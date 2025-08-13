@@ -1,4 +1,4 @@
-name: Build Literature Review
+name: Build & Deploy Lit Review + Notes
 
 on:
   push:
@@ -10,24 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Pandoc
+      - name: Setup Pandoc
         uses: pandoc/actions/setup@v1
         with:
           version: '3.1.11'
 
-      - name: Install LaTeX (for PDF)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            texlive-xetex \
-            texlive-fonts-recommended \
-            texlive-latex-recommended \
-            texlive-latex-extra
-
-      - name: Build HTML
+      - name: Build review.html
         run: |
           mkdir -p build
           pandoc notes/review.md \
@@ -38,38 +29,56 @@ jobs:
             --csl=refs/apa.csl \
             --metadata reference-section-title="References" \
             --metadata link-citations=true \
-            --standalone \
             --metadata title="Literature Review" \
+            --metadata date="Last updated $(date '+%d %B %Y')" \
+            --standalone \
             -o build/review.html
 
-      - name: Build DOCX
+      - name: Build reading notes -> HTML
         run: |
-          pandoc notes/review.md \
-            --from=markdown \
-            --citeproc \
-            --bibliography=refs/library.bib \
-            --csl=refs/apa.csl \
-            --metadata reference-section-title="References" \
-            --metadata link-citations=true \
-            -o build/lit-review.docx
+          mkdir -p build/notes-html
+          shopt -s nullglob
+          for f in notes/reading-notes/*.md; do
+            base="$(basename "$f")"
+            [ "$base" = "template.md" ] && continue
+            out="build/notes-html/${base%.md}.html"
+            pandoc "$f" \
+              --from=markdown \
+              --to=html5 \
+              --standalone \
+              --metadata date="Last updated $(date '+%d %B %Y')" \
+              -o "$out"
+          done
 
-      - name: Build PDF
+      - name: Create notes index
         run: |
-          pandoc notes/review.md \
-            --from=markdown \
-            --pdf-engine=xelatex \
-            --citeproc \
-            --bibliography=refs/library.bib \
-            --csl=refs/apa.csl \
-            --metadata reference-section-title="References" \
-            --metadata link-citations=true \
-            -o build/lit-review.pdf
+          NOTES_DIR="build/notes-html"
+          mkdir -p "$NOTES_DIR"
+          {
+            echo "<!doctype html><meta charset='utf-8'><title>Reading Notes</title>"
+            echo "<main style='max-width:860px;margin:2rem auto;font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif'>"
+            echo "<h1 style='margin-bottom:1rem'>Reading Notes</h1><ul>"
+            for f in "$NOTES_DIR"/*.html; do
+              [ -e "$f" ] || continue
+              title=$(sed -n 's/.*<title>\(.*\)<\/title>.*/\1/p' "$f" | head -1)
+              file=$(basename "$f")
+              if [ -z "$title" ]; then title="${file%.html}"; fi
+              echo "<li><a href='./$file'>$title</a></li>"
+            done
+            echo "</ul>"
+            echo "<p style='margin-top:2rem'><a href='../review.html'>&larr; Back to Literature Review</a></p>"
+            echo "</main>"
+          } > "$NOTES_DIR/index.html"
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Link notes from review.html
+        run: |
+          NAV='<nav style="background:#f6f8fa;border-bottom:1px solid #e5e7eb;padding:12px 16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif"><a href="./notes-html/index.html" style="text-decoration:none;font-weight:600">Reading notes</a></nav>'
+          sed -i '0,/<body[^>]*>/s//&\n'"$NAV"'/' build/review.html || true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: lit-review-build
-          path: build/
+          path: build
 
   deploy:
     needs: build
@@ -78,17 +87,8 @@ jobs:
       pages: write
       id-token: write
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: lit-review-build
-          path: build
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
