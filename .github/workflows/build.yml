@@ -30,7 +30,6 @@ jobs:
             --metadata reference-section-title="References" \
             --metadata link-citations=true \
             --metadata title="Literature Review" \
-            --metadata date="Last updated $(date '+%d %B %Y')" \
             --standalone \
             -o build/review.html
 
@@ -46,8 +45,15 @@ jobs:
               --from=markdown \
               --to=html5 \
               --standalone \
-              --metadata date="Last updated $(date '+%d %B %Y')" \
               -o "$out"
+          done
+
+      - name: Add last updated footer
+        run: |
+          FOOTER="<footer style='margin-top:2rem;padding-top:1rem;border-top:1px solid #ddd;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:0.9rem;color:#555;'>Last updated $(date '+%d %B %Y')</footer>"
+          for f in build/*.html build/notes-html/*.html; do
+            [ -f "$f" ] || continue
+            sed -i 's|</body>|'"$FOOTER"'\n</body>|' "$f"
           done
 
       - name: Create notes index
