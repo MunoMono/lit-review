@@ -3,6 +3,10 @@ title: "Responsible Use of Large Language Models: An Analogy with the Oxford Tut
 citation_key: "Lissack2024"
 authors: "Michael Lissack; Brenden Meagher"
 year: "2024"
+
+bibliography: ../../refs/library.bib
+csl: ../../refs/apa.csl
+link-citations: true
 ---
 
 ## Summary

@@ -3,6 +3,10 @@ title: "<Paper title here>"
 citation_key: "<BibTeX key here, e.g. Smith2020>"
 authors: "<Authors here>"
 year: "<Year>"
+
+bibliography: ../../refs/library.bib
+csl: ../../refs/apa.csl
+link-citations: true
 ---
 
 ## Summary
@@ -23,4 +27,3 @@ year: "<Year>"
 - "<Quote>" (p. X)
 
 ## Related works
-- [@Other2021] compares to this study because...

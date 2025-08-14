@@ -3,6 +3,10 @@ title: "The Future End of Design Work: A Critical Overview of Managerialism, Gen
 citation_key: "HernandezRamirez2024"
 authors: "Rodrigo Hernández-Ramírez; João Batalheiro Ferreira"
 year: "2024"
+
+bibliography: ../../refs/library.bib
+csl: ../../refs/apa.csl
+link-citations: true
 ---
 
 ## Summary
