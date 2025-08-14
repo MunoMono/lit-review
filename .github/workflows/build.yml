@@ -68,6 +68,11 @@ jobs:
               --from=markdown \
               --to=html5 \
               --standalone \
+              --citeproc \
+              --bibliography=refs/library.bib \
+              --csl=refs/apa.csl \
+              --metadata reference-section-title="References" \
+              --metadata link-citations=true \
               --metadata date="Last updated $(date '+%d %B %Y')" \
               --include-before-body=build/includes/note-nav.html \
               --include-after-body=build/includes/footer.html \
