@@ -1,0 +1,42 @@
+/* Typography (inherits your site stack if present) */
+body { line-height: 1.6; }
+
+/* In‑text citations: look like normal text, no underline */
+.citation a {
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 0;
+}
+
+/* Hover state: subtle underline if you want */
+.citation a:hover {
+  text-decoration: underline;
+}
+
+/* References block: spacing + readable size */
+.references {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.95rem;
+}
+
+/* Each CSL entry spacing */
+.references .csl-entry {
+  margin: 0 0 0.75rem 0;
+}
+
+/* Hanging indent version (Pandoc may emit this class) */
+.hanging-indent .csl-entry {
+  margin-left: 2em;
+  text-indent: -2em;
+}
+
+/* If Pandoc emits left/right columns for numbered styles */
+.csl-left-margin { min-width: 2em; float: left; }
+.csl-right-inline { margin-left: 2em; }
+
+/* TOC polish (optional) */
+#TOC { margin: 1rem 0 2rem; }
+#TOC a { text-decoration: none; color: inherit; }
+#TOC a:hover { text-decoration: underline; }

@@ -1,36 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUTDIR="notes-html"
-mkdir -p "$OUTDIR"
+mkdir -p notes-html
+# ensure filter dir exists (in case it’s not under version control yet)
+test -d filters || mkdir -p filters
 
-# Ensure there are notes to build
-shopt -s nullglob
-files=(notes/reading-notes/*.md)
-if (( ${#files[@]} == 0 )); then
-  echo "No notes found in notes/reading-notes/*.md"; exit 1
-fi
-
-# 1) Build each note page with citations resolved
-for f in $(printf '%s\n' "${files[@]}" | sort); do
+# 1) Build each note page with citations resolved (bullets included)
+for f in notes/reading-notes/*.md; do
   base="$(basename "$f" .md)"
   pandoc "$f" \
-    --standalone --citeproc \
+    --standalone \
+    --lua-filter=filters/citations-in-lists.lua \
+    --citeproc \
     --csl refs/apa.csl \
     --bibliography refs/library.bib \
-    -M link-citations=true \
-    -o "$OUTDIR/${base}.html"
-  echo "Built $OUTDIR/${base}.html"
+    -o "notes-html/${base}.html"
+  echo "Built notes-html/${base}.html"
 done
 
-# 2) Build the aggregated index page
-pandoc "${files[@]}" \
-  --standalone --citeproc \
+# 2) Build the aggregated index page (also resolve citations inside bullets)
+pandoc notes/reading-notes/*.md \
+  --standalone \
+  --lua-filter=filters/citations-in-lists.lua \
+  --citeproc \
   --csl refs/apa.csl \
   --bibliography refs/library.bib \
-  -M title="Reading Notes" \
-  -M link-citations=true \
-  --toc \
-  -o "$OUTDIR/index.html"
+  -M title="Reading Notes" --toc \
+  -o notes-html/index.html
 
-echo "Built $OUTDIR/index.html ✅"
+echo "Built notes-html/index.html ✅"
