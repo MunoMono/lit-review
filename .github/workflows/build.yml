@@ -56,6 +56,7 @@ jobs:
             --include-after-body=build/includes/footer.html \
             -o build/review.html
 
+      # 🔧 Build each reading note WITH CITEPROC
       - name: Build reading notes → HTML
         run: |
           mkdir -p build/notes-html
@@ -71,13 +72,20 @@ jobs:
               --citeproc \
               --bibliography=refs/library.bib \
               --csl=refs/apa.csl \
-              --metadata reference-section-title="References" \
               --metadata link-citations=true \
               --metadata date="Last updated $(date '+%d %B %Y')" \
               --include-before-body=build/includes/note-nav.html \
               --include-after-body=build/includes/footer.html \
               -o "$out"
           done
+
+      # ✅ Guard: fail if any raw [@key] citations remain
+      - name: Verify citations are resolved
+        run: |
+          if grep -R "\[@[A-Za-z0-9:_-]\+\]" -n build/notes-html || true; then
+            echo "::error::Unresolved citations found in note HTML. Check keys and that citeproc ran."
+            exit 1
+          fi
 
       - name: Create notes index
         run: |
