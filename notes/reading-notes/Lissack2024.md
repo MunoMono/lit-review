@@ -5,9 +5,11 @@ authors: "Michael Lissack; Brenden Meagher"
 year: "2024"
 
 bibliography: ../../refs/library.bib
-csl: ../../refs/apa.csl
+csl: https://www.zotero.org/styles/harvard-cite-them-right
 link-citations: true
 ---
+[@Lissack2024](Lissack2024.html)
+
 
 ## Summary
 - **What is the author saying?**  

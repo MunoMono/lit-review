@@ -1,13 +1,15 @@
 ---
 title: "The Future End of Design Work: A Critical Overview of Managerialism, Generative AI, and the Nature of Knowledge Work, and Why Craft Remains Relevant"
-citation_key: "HernandezRamirez2024"
+citation_key: "Hernndez-Ramrez2024"
 authors: "Rodrigo Hernández-Ramírez; João Batalheiro Ferreira"
 year: "2024"
 
 bibliography: ../../refs/library.bib
-csl: ../../refs/apa.csl
+csl: https://www.zotero.org/styles/harvard-cite-them-right
 link-citations: true
 ---
+[@Hernndez-Ramrez2024](HernandezRamirez2024.html)
+
 
 ## Summary
 - **What is the author saying?**  

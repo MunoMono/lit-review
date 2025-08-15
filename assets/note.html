@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="$lang$" xml:lang="$lang$">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+
+  $for(header-includes)$
+  $header-includes$
+  $endfor$
+
+  <link rel="stylesheet" href="notes.css" />
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="review.html">← Back to Literature Review</a>
+  <span> · </span>
+  <a href="index.html">All notes</a>
+</nav>
+
+<header class="page-header">
+  <h1 class="title">$title$</h1>
+
+  $if(authors)$
+  <p class="authors">$authors$</p>
+  $endif$
+
+  <p class="last-updated">
+    Last updated <span id="last-updated"></span>
+  </p>
+</header>
+
+<main id="content">
+$body$
+</main>
+
+<script>
+  // Put the file’s modified date under the authors line
+  (function () {
+    var el = document.getElementById('last-updated');
+    if (el) el.textContent = new Date(document.lastModified)
+      .toLocaleDateString(undefined, { day:'2-digit', month:'long', year:'numeric' });
+  }());
+</script>
+
+</body>
+</html>

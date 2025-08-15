@@ -5,7 +5,7 @@ authors: "<Authors here>"
 year: "<Year>"
 
 bibliography: ../../refs/library.bib
-csl: ../../refs/apa.csl
+csl: https://www.zotero.org/styles/harvard-cite-them-right
 link-citations: true
 ---
 
