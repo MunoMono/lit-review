@@ -1,0 +1,56 @@
+name: Build & Deploy (Pages)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc python3
+
+      - name: Build site
+        run: |
+          chmod +x scripts/build-notes.sh
+          ./scripts/build-notes.sh
+
+      # Guardrail: fail if placeholder refs appear in review.html
+      - name: Sanity check references
+        run: |
+          set -eux
+          test -f notes-html/review.html
+          ! grep -q 'Lee, J. (2018)' notes-html/review.html || (echo "Found Lee 2018 in review.html"; exit 1)
+          ! grep -q 'Smith, J. (2020)' notes-html/review.html || (echo "Found Smith 2020 in review.html"; exit 1)
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: notes-html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
