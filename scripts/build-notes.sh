@@ -45,14 +45,8 @@ for f in "${note_files[@]}"; do
   echo "Built notes-html/${base}.html"
 done
 
-# ---------- 2) Build index: FULL Harvard refs (CSL) linking to notes ----------
-# We:
-#   a) Collect citation_key -> note basename mapping.
-#   b) Ask Pandoc/CSL to format those refs (nocite list).
-#   c) Post-process the #refs HTML to wrap each csl-entry with a link to the note.
-#      (Order comes from CSL, so it's Harvard-style already.)
-
-# 2a) Collect mapping and build a nocite markdown
+# ---------- 2) Build index: FULL Harvard refs linking to notes ----------
+# a) Build nocite list from citation_key in each note
 tmp_map="$(mktemp --suffix=.tsv)"
 tmp_refs_md="$(mktemp --suffix=.md)"
 {
@@ -64,9 +58,9 @@ tmp_refs_md="$(mktemp --suffix=.md)"
     base="$(basename "$f" .md)"
     key_line="$(grep -m1 -E '^[[:space:]]*citation_key[[:space:]]*:' "$f" || true)"
     [[ -z "${key_line:-}" ]] && continue
-    key="${key_line#*:}"; key="${key//\"/}"; key="${key//\'/}"; key="${key// /}"
+    key="${key_line#*:}"; key="${key//\"/}"; key="${key//\'/}"; key="$(echo "$key" | tr -d '[:space:]')"
     [[ -z "$key" ]] && continue
-    echo -e "${key}\t${base}" >> "$tmp_map"
+    printf '%s\t%s\n' "$key" "$base" >> "$tmp_map"
     echo "  @$key"
   done
   echo '---'
@@ -75,7 +69,7 @@ tmp_refs_md="$(mktemp --suffix=.md)"
   echo ':::'
 } > "$tmp_refs_md"
 
-# 2b) Produce CSL-formatted references as HTML fragment
+# b) Ask Pandoc to render the full references once
 refs_fragment="$(mktemp --suffix=.html)"
 pandoc "$tmp_refs_md" \
   -f markdown \
@@ -85,41 +79,46 @@ pandoc "$tmp_refs_md" \
   -t html \
   > "$refs_fragment"
 
-# 2c) Build the final index.html with each reference wrapped in a link to its note
+# c) Post-process: wrap each reference in a link to its note.
+#    If the key→basename mapping fails, fall back to ./KEY.html (and keep only those that exist).
 python3 - "$refs_fragment" "$tmp_map" notes-html/index.html <<'PY'
 import re, sys, pathlib, html
 
 frag_path = pathlib.Path(sys.argv[1])
 map_path  = pathlib.Path(sys.argv[2])
 out_path  = pathlib.Path(sys.argv[3])
+site_dir  = out_path.parent  # notes-html
 
 frag = frag_path.read_text(encoding="utf-8")
 
-# Load key->basename map
+# Load key->basename (from note filenames)
 key_to_base = {}
-for line in map_path.read_text(encoding="utf-8").splitlines():
-    if not line.strip():
-        continue
-    key, base = line.split("\t", 1)
-    key_to_base[key.strip()] = base.strip()
+if map_path.exists():
+    for line in map_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        key, base = line.split("\t", 1)
+        key_to_base[key.strip()] = base.strip()
 
-# Extract the whole refs block
+# Pull the refs block
 m_refs = re.search(r'(<div id="refs"[^>]*>.*?</div>)', frag, flags=re.DOTALL)
 refs_html = m_refs.group(1) if m_refs else ""
 
-# Find each entry and its key from id="ref-KEY"
-entries = []
+# Build list items in CSL order
+items = []
 for m in re.finditer(r'<div id="ref-([^"]+)"[^>]*>(.*?)</div>', refs_html, flags=re.DOTALL):
     key = m.group(1)
     inner = m.group(2).strip()
-    base = key_to_base.get(key)
-    if not base:
-        continue
-    # Wrap the entry content as the link text
-    linked = f'<li><a href="./{html.escape(base)}.html">{inner}</a></li>'
-    entries.append(linked)
 
-# Assemble a minimal HTML page
+    # Resolve link target: map key→base; else fallback base = key
+    base = key_to_base.get(key, key)
+    target = site_dir / f"{base}.html"
+    if not target.exists():
+        # skip entries that don't have a note page
+        continue
+
+    items.append(f'<li><a href="./{html.escape(base)}.html">{inner}</a></li>')
+
 page = f"""<!DOCTYPE html>
 <html lang="">
 <head>
@@ -129,12 +128,15 @@ page = f"""<!DOCTYPE html>
   <link rel="stylesheet" href="notes.css" />
 </head>
 <body>
+  <nav class="top-nav">
+    <a href="./review.html">&larr; Back to Literature Review</a>
+  </nav>
   <header class="page-header">
     <h1 class="title">Reading Notes</h1>
   </header>
   <main id="content">
     <ul>
-      {'\\n      '.join(entries)}
+      {'\\n      '.join(items)}
     </ul>
   </main>
 </body>
@@ -169,7 +171,7 @@ if [[ -f notes/review.md ]]; then
     for f in "${note_files[@]}"; do
       key_line="$(grep -m1 -E '^[[:space:]]*citation_key[[:space:]]*:' "$f" || true)"
       [[ -z "${key_line:-}" ]] && continue
-      key="${key_line#*:}"; key="${key//\"/}"; key="${key//\'/}"; key="${key// /}"
+      key="${key_line#*:}"; key="${key//\"/}"; key="${key//\'/}"; key="$(echo "$key" | tr -d '[:space:]')"
       [[ -n "$key" ]] && echo "  @$key"
     done
     echo '---'
