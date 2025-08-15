@@ -51,19 +51,29 @@ else
   echo "No reading notes found; skipping index."
 fi
 
-# ---------- 3) Build the Literature Review with auto-populated References
-tmp_nocite="$(mktemp)"
+# ---------- 3) Build the Literature Review with refs ONLY from reading notes
+tmp_meta="$(mktemp)"
+
 {
-  echo 'nocite: |'
+  echo 'nocite: |'        # include note keys even if not cited in the body
+  # collect citation_key from each reading note
   for f in "${note_files[@]}"; do
     key_line="$(grep -m1 -E '^[[:space:]]*citation_key[[:space:]]*:' "$f" || true)"
-    if [[ -n "${key_line:-}" ]]; then
-      key="$(sed -E 's/^[[:space:]]*citation_key[[:space:]]*:[[:space:]]*//' <<<"$key_line")"
-      key="${key//\"/}"; key="${key//\'/}"; key="${key// /}"
-      [[ -n "$key" ]] && echo "  @$key"
-    fi
+    [[ -z "${key_line:-}" ]] && continue
+    key="$(sed -E 's/^[[:space:]]*citation_key[[:space:]]*:[[:space:]]*//' <<<"$key_line")"
+    key="${key//\"/}"; key="${key//\'/}"; key="${key// /}"
+    [[ -n "$key" ]] && echo "  @$key"
   done
-} > "$tmp_nocite"
+
+  echo 'keep_refs:'
+  for f in "${note_files[@]}"; do
+    key_line="$(grep -m1 -E '^[[:space:]]*citation_key[[:space:]]*:' "$f" || true)"
+    [[ -z "${key_line:-}" ]] && continue
+    key="$(sed -E 's/^[[:space:]]*citation_key[[:space:]]*:[[:space:]]*//' <<<"$key_line")"
+    key="${key//\"/}"; key="${key//\'/}"; key="${key// /}"
+    [[ -n "$key" ]] && echo "  - $key"
+  done
+} > "$tmp_meta"
 
 if [[ -f notes/review.md ]]; then
   pandoc notes/review.md \
@@ -71,11 +81,12 @@ if [[ -f notes/review.md ]]; then
     --citeproc \
     --csl "$CSL_STYLE" \
     --bibliography refs/library.bib \
-    --metadata-file "$tmp_nocite" \
+    --metadata-file "$tmp_meta" \
+    --lua-filter=filters/keep-refs.lua \
     -o notes-html/review.html
-  echo "Built notes-html/review.html ✅"
+  echo "Built notes-html/review.html ✅ (refs from reading-notes only)"
 else
   echo "Skipping lit review: notes/review.md not found."
 fi
 
-rm -f "$tmp_nocite"
+rm -f "$tmp_meta"
