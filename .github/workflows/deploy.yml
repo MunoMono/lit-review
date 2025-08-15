@@ -2,8 +2,7 @@ name: Build & Deploy (Pages)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -20,9 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/configure-pages@v5
 
-      # Known-good Pandoc (no apt quirks)
+      # Known-good Pandoc (bundled citeproc)
       - uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: '3.1.11'
@@ -31,22 +31,31 @@ jobs:
         shell: bash
         run: |
           set -eux
-          pandoc -v | head -n 3
+          pandoc -v | head -n 5
           python3 --version || true
           lua -v || true
+          uname -a
+          echo "PWD=$(pwd)"
+          echo "Repo tree (top level):"
+          ls -lah
 
-      - name: Build site
+      - name: Build site (trace)
         shell: bash
         run: |
           set -euxo pipefail
+          umask 022
           chmod +x scripts/build-notes.sh
-          ./scripts/build-notes.sh
+          # capture *everything* we do
+          bash -x ./scripts/build-notes.sh 2>&1 | tee build.log
 
       - name: List build output
+        if: always()
         shell: bash
         run: |
           set -eux
-          ls -lah notes-html
+          echo "::group::notes-html"
+          ls -lah notes-html || true
+          echo "::endgroup::"
           test -f notes-html/index.html
           test -f notes-html/review.html
 
@@ -57,7 +66,24 @@ jobs:
           ! grep -q 'Lee, J. (2018)' notes-html/review.html
           ! grep -q 'Smith, J. (2020)' notes-html/review.html
 
-      - name: Upload artifact
+      # Upload logs and the built folder so we can inspect even on failure
+      - name: Upload debug logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-debug
+          path: |
+            build.log
+            notes-html/**
+            scripts/**
+            filters/**
+            assets/**
+            notes/**
+            refs/**
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: notes-html
@@ -65,9 +91,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
     steps:
