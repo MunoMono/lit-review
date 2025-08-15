@@ -26,13 +26,17 @@ TEMPLATE_ARG=()
 REVIEW_TEMPLATE_ARG=()
 [[ -f assets/review.html ]] && REVIEW_TEMPLATE_ARG=(--template assets/review.html)
 
-# ---------- 1) Build each reading-note page ----------
+# ---------- Collect reading-note files ----------
 note_files=(notes/reading-notes/*.md)
+
+# ---------- 1) Build each reading-note page ----------
+# Also strip any leading "[@key](file.html)" line so it doesn't render under the title.
 for f in "${note_files[@]}"; do
   base="$(basename "$f" .md)"
   pandoc "$f" \
     --standalone \
     "${TEMPLATE_ARG[@]}" \
+    --lua-filter=filters/strip-leading-citation.lua \
     --lua-filter=filters/citations-in-lists.lua \
     --citeproc \
     --csl "$CSL_STYLE" \
@@ -41,24 +45,62 @@ for f in "${note_files[@]}"; do
   echo "Built notes-html/${base}.html"
 done
 
-# ---------- 2) Build the aggregated Reading Notes index ----------
-if ((${#note_files[@]})); then
-  pandoc "${note_files[@]}" \
-    --standalone \
-    --lua-filter=filters/citations-in-lists.lua \
-    --citeproc \
-    --csl "$CSL_STYLE" \
-    --bibliography refs/library.bib \
-    -M title="Reading Notes" --toc \
-    -o notes-html/index.html
-  echo "Built notes-html/index.html ✅"
-else
-  echo "No reading notes found; skipping index."
-fi
+# ---------- 2) Build a clean Reading Notes index ----------
+# Make a small markdown file listing notes as "Surname and Surname (Year)" → note.html
+tmp_idx_md="$(mktemp -t notesindex.XXXXXX.md)"
+{
+  echo '---'
+  echo 'title: "Reading Notes"'
+  echo '---'
+  echo
+  for f in "${note_files[@]}"; do
+    base="$(basename "$f" .md)"
+    # Extract metadata from YAML
+    title="$(grep -m1 -E '^[[:space:]]*title[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*"(.*)"[[:space:]]*$/\1/; s/^[^:]*:[[:space:]]*//')"
+    authors="$(grep -m1 -E '^[[:space:]]*authors[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
+    year="$(grep -m1 -E '^[[:space:]]*year[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
+
+    # Derive a short "Surname and Surname" label from "First Last; First2 Last2; ..."
+    # Keep it simple: take last word of each name split by ';'
+    IFS=';' read -r -a arr <<<"${authors:-}"
+    surnames=()
+    for a in "${arr[@]}"; do
+      # trim
+      a="$(echo "$a" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+      # take last token as surname
+      s="$(echo "$a" | awk '{print $NF}')"
+      [[ -n "$s" ]] && surnames+=("$s")
+    done
+    label=""
+    if ((${#surnames[@]}==1)); then
+      label="${surnames[0]}"
+    elif ((${#surnames[@]}==2)); then
+      label="${surnames[0]} and ${surnames[1]}"
+    elif ((${#surnames[@]}>2)); then
+      label="${surnames[0]} et al."
+    fi
+
+    # Fallbacks if metadata missing
+    [[ -z "$label" ]] && label="${authors:-Unknown}"
+    [[ -z "$year"  ]] && year="n.d."
+
+    echo "- [${label} (${year})](${base}.html)"
+  done
+  echo
+} > "$tmp_idx_md"
+
+pandoc "$tmp_idx_md" \
+  --standalone \
+  --citeproc \
+  --csl "$CSL_STYLE" \
+  --bibliography refs/library.bib \
+  -o notes-html/index.html
+rm -f "$tmp_idx_md"
+echo "Built notes-html/index.html ✅"
 
 # ---------- 3) Build the Literature Review with refs ONLY from reading-notes ----------
-# 3a) Build review.html WITHOUT any auto bibliography (use review template if present)
 if [[ -f notes/review.md ]]; then
+  # 3a) Build review.html WITHOUT auto bibliography (use review template if present)
   pandoc notes/review.md \
     --standalone \
     "${REVIEW_TEMPLATE_ARG[@]}" \
