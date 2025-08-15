@@ -21,6 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Configure Pages (sets up the correct publish environment)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - name: Install Pandoc
         run: |
           sudo apt-get update
@@ -31,14 +35,22 @@ jobs:
           chmod +x scripts/build-notes.sh
           ./scripts/build-notes.sh
 
+      - name: List build output
+        run: |
+          echo "::group::tree notes-html"
+          ls -lah notes-html
+          echo "::endgroup::"
+          test -f notes-html/index.html
+          test -f notes-html/review.html
+
       # Guardrail: fail if placeholder refs appear in review.html
       - name: Sanity check references
         run: |
           set -eux
-          test -f notes-html/review.html
-          ! grep -q 'Lee, J. (2018)' notes-html/review.html || (echo "Found Lee 2018 in review.html"; exit 1)
-          ! grep -q 'Smith, J. (2020)' notes-html/review.html || (echo "Found Smith 2020 in review.html"; exit 1)
+          ! grep -q 'Lee, J. (2018)' notes-html/review.html
+          ! grep -q 'Smith, J. (2020)' notes-html/review.html
 
+      # Upload exactly what we want to host
       - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v3
         with:
