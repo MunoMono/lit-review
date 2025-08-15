@@ -18,9 +18,13 @@ CSL_STYLE="${CSL_STYLE:-https://www.zotero.org/styles/harvard-cite-them-right}"
 # Copy CSS (if present) so all pages pick up consistent styling.
 [[ -f assets/notes.css ]] && cp -f assets/notes.css notes-html/notes.css
 
-# Optional HTML template (for timestamp-above-title + authors-as-H3)
+# Optional HTML template (for note pages: timestamp-above-title + authors-as-H3)
 TEMPLATE_ARG=()
 [[ -f assets/note.html ]] && TEMPLATE_ARG=(--template assets/note.html)
+
+# Optional review template (adds top nav + same header layout to review.html)
+REVIEW_TEMPLATE_ARG=()
+[[ -f assets/review.html ]] && REVIEW_TEMPLATE_ARG=(--template assets/review.html)
 
 # ---------- 1) Build each reading-note page ----------
 note_files=(notes/reading-notes/*.md)
@@ -53,10 +57,11 @@ else
 fi
 
 # ---------- 3) Build the Literature Review with refs ONLY from reading-notes ----------
-# 3a) Build review.html WITHOUT any auto bibliography
+# 3a) Build review.html WITHOUT any auto bibliography (use review template if present)
 if [[ -f notes/review.md ]]; then
   pandoc notes/review.md \
     --standalone \
+    "${REVIEW_TEMPLATE_ARG[@]}" \
     --citeproc \
     --csl "$CSL_STYLE" \
     --bibliography refs/library.bib \
