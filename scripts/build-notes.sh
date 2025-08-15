@@ -2,6 +2,7 @@
 set -euo pipefail
 umask 022
 
+# Always run from repo root
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 shopt -s nullglob
@@ -10,25 +11,33 @@ mkdir -p notes-html
 test -d filters || mkdir -p filters
 test -d assets  || mkdir -p assets
 
+# Default CSL (override with $CSL_STYLE if needed)
 CSL_STYLE="${CSL_STYLE:-https://www.zotero.org/styles/harvard-cite-them-right}"
 
+# Shared CSS for all pages
 [[ -f assets/notes.css ]] && cp -f assets/notes.css notes-html/notes.css
 
+# Templates
 TEMPLATE_ARG=()
 [[ -f assets/note.html ]] && TEMPLATE_ARG=(--template assets/note.html)
 
 REVIEW_TEMPLATE_ARG=()
 [[ -f assets/review.html ]] && REVIEW_TEMPLATE_ARG=(--template assets/review.html)
 
+# Optional Lua strip filter (only if present)
+STRIP_FILTER_ARG=()
+[[ -f filters/strip-leading-citation.lua ]] && STRIP_FILTER_ARG=(--lua-filter=filters/strip-leading-citation.lua)
+
+# Collect reading-note files
 note_files=(notes/reading-notes/*.md)
 
-# 1) note pages
+# ---------- 1) Build each note page ----------
 for f in "${note_files[@]}"; do
   base="$(basename "$f" .md)"
   pandoc "$f" \
     --standalone \
     "${TEMPLATE_ARG[@]}" \
-    --lua-filter=filters/strip-leading-citation.lua \
+    "${STRIP_FILTER_ARG[@]}" \
     --lua-filter=filters/citations-in-lists.lua \
     --citeproc \
     --csl "$CSL_STYLE" \
@@ -37,7 +46,7 @@ for f in "${note_files[@]}"; do
   echo "Built notes-html/${base}.html"
 done
 
-# 2) index (clean list)
+# ---------- 2) Build index: simple list of notes ----------
 tmp_idx_md="$(mktemp --suffix=.md)"
 {
   echo '---'
@@ -82,8 +91,9 @@ pandoc "$tmp_idx_md" \
 rm -f "$tmp_idx_md"
 echo "Built notes-html/index.html ✅"
 
-# 3) lit review with refs only from notes
+# ---------- 3) Literature review with refs ONLY from reading-notes ----------
 if [[ -f notes/review.md ]]; then
+  # 3a) Build review without auto bibliography
   pandoc notes/review.md \
     --standalone \
     "${REVIEW_TEMPLATE_ARG[@]}" \
@@ -94,6 +104,7 @@ if [[ -f notes/review.md ]]; then
     -o notes-html/review.html
   echo "Built notes-html/review.html (bibliography suppressed)"
 
+  # 3b) Generate refs fragment from note keys
   tmp_refs_md="$(mktemp --suffix=.md)"
   {
     echo '---'
@@ -121,6 +132,7 @@ if [[ -f notes/review.md ]]; then
     -t html \
     > "$refs_fragment"
 
+  # 3c) Splice refs into review.html
   python3 - "$refs_fragment" notes-html/review.html <<'PY'
 import re, sys, pathlib
 frag = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").strip()
