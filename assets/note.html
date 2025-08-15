@@ -4,11 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
-
   $for(header-includes)$
   $header-includes$
   $endfor$
-
   <link rel="stylesheet" href="notes.css" />
 </head>
 <body>
@@ -20,17 +18,9 @@
 </nav>
 
 <header class="page-header">
-
-  <p class="last-updated">
-    Last updated <span id="last-updated"></span>
-  </p>
-
+  <p class="last-updated">Last updated <span id="last-updated"></span></p>
   <h1 class="title">$title$</h1>
-
-  $if(authors)$
-  <h3 class="authors">$authors$</h3>
-  $endif$
-
+  $if(authors)$<h3 class="authors">$authors$</h3>$endif$
 </header>
 
 <main id="content">

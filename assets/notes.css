@@ -74,11 +74,7 @@ thead th { background: #fafafa; }
    Citations & References
    ========================= */
 /* Pandoc wraps citations with <span class="citation"><a ...>...</a></span> when link-citations:true */
-.citation a {
-  text-decoration: none;
-  color: inherit;
-  border-bottom: 0;
-}
+.citation a { text-decoration: none; color: inherit; border-bottom: 0; }
 .citation a:hover { text-decoration: underline; }
 
 /* References container (Pandoc emits <div id="refs" class="references">) */
@@ -93,16 +89,13 @@ thead th { background: #fafafa; }
 .references .csl-entry { margin: 0 0 0.75rem 0; }
 
 /* Hanging indent (Pandoc class) */
-.hanging-indent .csl-entry {
-  margin-left: 2em;
-  text-indent: -2em;
-}
+.hanging-indent .csl-entry { margin-left: 2em; text-indent: -2em; }
 
 /* Numbered CSL layouts sometimes emit left/right columns */
 .csl-left-margin { min-width: 2em; float: left; }
 .csl-right-inline { margin-left: 2em; }
 
-/* Clear floats just in case */
+/* Clear floats */
 .references::after { content: ""; display: table; clear: both; }
 
 /* =========================
