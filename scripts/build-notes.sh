@@ -19,8 +19,7 @@ CSL_STYLE="${CSL_STYLE:-https://www.zotero.org/styles/harvard-cite-them-right}"
 
 # Templates
 TEMPLATE_ARG=()
-[[ -f assets/note.html ]] && TEMPLATE_ARG=(--template assets/note.html)
-
+[[ -f assets/note.html   ]] && TEMPLATE_ARG=(--template assets/note.html)
 REVIEW_TEMPLATE_ARG=()
 [[ -f assets/review.html ]] && REVIEW_TEMPLATE_ARG=(--template assets/review.html)
 
@@ -46,59 +45,105 @@ for f in "${note_files[@]}"; do
   echo "Built notes-html/${base}.html"
 done
 
-# ---------- 2) Build index: Harvard‑style alphabetical list ----------
-# We generate a tiny markdown file with ONLY a list of "Surname and Surname (Year)" → link to each note.
-# No citeproc, no concat of note contents, so headings/refs won't leak in.
+# ---------- 2) Build index: FULL Harvard refs (CSL) linking to notes ----------
+# We:
+#   a) Collect citation_key -> note basename mapping.
+#   b) Ask Pandoc/CSL to format those refs (nocite list).
+#   c) Post-process the #refs HTML to wrap each csl-entry with a link to the note.
+#      (Order comes from CSL, so it's Harvard-style already.)
 
-tmp_idx_md="$(mktemp --suffix=.md)"
+# 2a) Collect mapping and build a nocite markdown
+tmp_map="$(mktemp --suffix=.tsv)"
+tmp_refs_md="$(mktemp --suffix=.md)"
 {
   echo '---'
-  echo 'title: "Reading Notes"'
+  echo 'bibliography: refs/library.bib'
+  echo "csl: $CSL_STYLE"
+  echo 'nocite: |'
+  for f in "${note_files[@]}"; do
+    base="$(basename "$f" .md)"
+    key_line="$(grep -m1 -E '^[[:space:]]*citation_key[[:space:]]*:' "$f" || true)"
+    [[ -z "${key_line:-}" ]] && continue
+    key="${key_line#*:}"; key="${key//\"/}"; key="${key//\'/}"; key="${key// /}"
+    [[ -z "$key" ]] && continue
+    echo -e "${key}\t${base}" >> "$tmp_map"
+    echo "  @$key"
+  done
   echo '---'
   echo
+  echo '::: {#refs}'
+  echo ':::'
+} > "$tmp_refs_md"
 
-  # Build an in-memory array of "sortkey|markdown-line" and then sort case-insensitively.
-  mapfile -t rows < <(
-    for f in "${note_files[@]}"; do
-      base="$(basename "$f" .md)"
-      authors="$(grep -m1 -E '^[[:space:]]*authors[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
-      year="$(grep -m1 -E '^[[:space:]]*year[[:space:]]*:' "$f"    | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
+# 2b) Produce CSL-formatted references as HTML fragment
+refs_fragment="$(mktemp --suffix=.html)"
+pandoc "$tmp_refs_md" \
+  -f markdown \
+  --citeproc \
+  --csl "$CSL_STYLE" \
+  --bibliography refs/library.bib \
+  -t html \
+  > "$refs_fragment"
 
-      IFS=';' read -r -a arr <<<"${authors:-}"
-      surnames=()
-      for a in "${arr[@]}"; do
-        a="$(echo "$a" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
-        [[ -z "$a" ]] && continue
-        s="$(echo "$a" | awk '{print $NF}')"
-        [[ -n "$s" ]] && surnames+=("$s")
-      done
+# 2c) Build the final index.html with each reference wrapped in a link to its note
+python3 - "$refs_fragment" "$tmp_map" notes-html/index.html <<'PY'
+import re, sys, pathlib, html
 
-      label=""
-      if ((${#surnames[@]}==1)); then
-        label="${surnames[0]}"
-      elif ((${#surnames[@]}==2)); then
-        label="${surnames[0]} and ${surnames[1]}"
-      elif ((${#surnames[@]}>2)); then
-        label="${surnames[0]} et al."
-      fi
-      [[ -z "$label" ]] && label="${authors:-Unknown}"
-      [[ -z "$year"  ]] && year="n.d."
+frag_path = pathlib.Path(sys.argv[1])
+map_path  = pathlib.Path(sys.argv[2])
+out_path  = pathlib.Path(sys.argv[3])
 
-      # emit "sortkey|line"
-      printf '%s|%s\n' "$(echo "$label" | tr '[:upper:]' '[:lower:]')" "- [${label} (${year})](./${base}.html)"
-    done | sort -f
-  )
+frag = frag_path.read_text(encoding="utf-8")
 
-  for r in "${rows[@]}"; do
-    echo "${r#*|}"
-  done
-  echo
-} > "$tmp_idx_md"
+# Load key->basename map
+key_to_base = {}
+for line in map_path.read_text(encoding="utf-8").splitlines():
+    if not line.strip():
+        continue
+    key, base = line.split("\t", 1)
+    key_to_base[key.strip()] = base.strip()
 
-pandoc "$tmp_idx_md" \
-  --standalone \
-  -o notes-html/index.html
-rm -f "$tmp_idx_md"
+# Extract the whole refs block
+m_refs = re.search(r'(<div id="refs"[^>]*>.*?</div>)', frag, flags=re.DOTALL)
+refs_html = m_refs.group(1) if m_refs else ""
+
+# Find each entry and its key from id="ref-KEY"
+entries = []
+for m in re.finditer(r'<div id="ref-([^"]+)"[^>]*>(.*?)</div>', refs_html, flags=re.DOTALL):
+    key = m.group(1)
+    inner = m.group(2).strip()
+    base = key_to_base.get(key)
+    if not base:
+        continue
+    # Wrap the entry content as the link text
+    linked = f'<li><a href="./{html.escape(base)}.html">{inner}</a></li>'
+    entries.append(linked)
+
+# Assemble a minimal HTML page
+page = f"""<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reading Notes</title>
+  <link rel="stylesheet" href="notes.css" />
+</head>
+<body>
+  <header class="page-header">
+    <h1 class="title">Reading Notes</h1>
+  </header>
+  <main id="content">
+    <ul>
+      {'\\n      '.join(entries)}
+    </ul>
+  </main>
+</body>
+</html>
+"""
+out_path.write_text(page, encoding="utf-8")
+PY
+
+rm -f "$tmp_refs_md" "$refs_fragment" "$tmp_map"
 echo "Built notes-html/index.html ✅"
 
 # ---------- 3) Literature review with refs ONLY from reading-notes ----------
@@ -115,7 +160,7 @@ if [[ -f notes/review.md ]]; then
   echo "Built notes-html/review.html (bibliography suppressed)"
 
   # 3b) Generate refs fragment from note keys
-  tmp_refs_md="$(mktemp --suffix=.md)"
+  tmp_refs_md2="$(mktemp --suffix=.md)"
   {
     echo '---'
     echo 'bibliography: refs/library.bib'
@@ -131,19 +176,19 @@ if [[ -f notes/review.md ]]; then
     echo
     echo '::: {#refs}'
     echo ':::'
-  } > "$tmp_refs_md"
+  } > "$tmp_refs_md2"
 
-  refs_fragment="$(mktemp --suffix=.html)"
-  pandoc "$tmp_refs_md" \
+  refs_fragment2="$(mktemp --suffix=.html)"
+  pandoc "$tmp_refs_md2" \
     -f markdown \
     --citeproc \
     --csl "$CSL_STYLE" \
     --bibliography refs/library.bib \
     -t html \
-    > "$refs_fragment"
+    > "$refs_fragment2"
 
   # 3c) Splice refs into review.html
-  python3 - "$refs_fragment" notes-html/review.html <<'PY'
+  python3 - "$refs_fragment2" notes-html/review.html <<'PY'
 import re, sys, pathlib
 frag = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").strip()
 html_path = pathlib.Path(sys.argv[2])
@@ -158,7 +203,7 @@ if n == 0:
 html_path.write_text(new_html, encoding="utf-8")
 PY
 
-  rm -f "$tmp_refs_md" "$refs_fragment"
+  rm -f "$tmp_refs_md2" "$refs_fragment2"
   echo "Injected references from reading-notes only ✅"
 else
   echo "Skipping lit review: notes/review.md not found."
