@@ -8,8 +8,7 @@ bibliography: ../../refs/library.bib
 csl: https://www.zotero.org/styles/harvard-cite-them-right
 link-citations: true
 ---
-[@Lissack2024](Lissack2024.html)
-
+[@Lissack2024]
 
 ## Summary
 - **What is the author saying?**  
