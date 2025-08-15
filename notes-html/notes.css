@@ -118,5 +118,5 @@ hr { border: 0; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
 
 /* Center the leading citation line */
 .page-header p:first-of-type {
-  text-align: center;
+  text-align: center !important;
 }

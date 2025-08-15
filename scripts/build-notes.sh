@@ -46,47 +46,57 @@ for f in "${note_files[@]}"; do
   echo "Built notes-html/${base}.html"
 done
 
-# ---------- 2) Build index: simple list of notes ----------
+# ---------- 2) Build index: Harvard‑style alphabetical list ----------
+# We generate a tiny markdown file with ONLY a list of "Surname and Surname (Year)" → link to each note.
+# No citeproc, no concat of note contents, so headings/refs won't leak in.
+
 tmp_idx_md="$(mktemp --suffix=.md)"
 {
   echo '---'
   echo 'title: "Reading Notes"'
   echo '---'
   echo
-  for f in "${note_files[@]}"; do
-    base="$(basename "$f" .md)"
-    authors="$(grep -m1 -E '^[[:space:]]*authors[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
-    year="$(grep -m1 -E '^[[:space:]]*year[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
 
-    IFS=';' read -r -a arr <<<"${authors:-}"
-    surnames=()
-    for a in "${arr[@]}"; do
-      a="$(echo "$a" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
-      [[ -z "$a" ]] && continue
-      s="$(echo "$a" | awk '{print $NF}')"
-      [[ -n "$s" ]] && surnames+=("$s")
-    done
-    label=""
-    if ((${#surnames[@]}==1)); then
-      label="${surnames[0]}"
-    elif ((${#surnames[@]}==2)); then
-      label="${surnames[0]} and ${surnames[1]}"
-    elif ((${#surnames[@]}>2)); then
-      label="${surnames[0]} et al."
-    fi
-    [[ -z "$label" ]] && label="${authors:-Unknown}"
-    [[ -z "$year"  ]] && year="n.d."
+  # Build an in-memory array of "sortkey|markdown-line" and then sort case-insensitively.
+  mapfile -t rows < <(
+    for f in "${note_files[@]}"; do
+      base="$(basename "$f" .md)"
+      authors="$(grep -m1 -E '^[[:space:]]*authors[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
+      year="$(grep -m1 -E '^[[:space:]]*year[[:space:]]*:' "$f"    | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//')"
 
-    echo "- [${label} (${year})](${base}.html)"
+      IFS=';' read -r -a arr <<<"${authors:-}"
+      surnames=()
+      for a in "${arr[@]}"; do
+        a="$(echo "$a" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+        [[ -z "$a" ]] && continue
+        s="$(echo "$a" | awk '{print $NF}')"
+        [[ -n "$s" ]] && surnames+=("$s")
+      done
+
+      label=""
+      if ((${#surnames[@]}==1)); then
+        label="${surnames[0]}"
+      elif ((${#surnames[@]}==2)); then
+        label="${surnames[0]} and ${surnames[1]}"
+      elif ((${#surnames[@]}>2)); then
+        label="${surnames[0]} et al."
+      fi
+      [[ -z "$label" ]] && label="${authors:-Unknown}"
+      [[ -z "$year"  ]] && year="n.d."
+
+      # emit "sortkey|line"
+      printf '%s|%s\n' "$(echo "$label" | tr '[:upper:]' '[:lower:]')" "- [${label} (${year})](./${base}.html)"
+    done | sort -f
+  )
+
+  for r in "${rows[@]}"; do
+    echo "${r#*|}"
   done
   echo
 } > "$tmp_idx_md"
 
 pandoc "$tmp_idx_md" \
   --standalone \
-  --citeproc \
-  --csl "$CSL_STYLE" \
-  --bibliography refs/library.bib \
   -o notes-html/index.html
 rm -f "$tmp_idx_md"
 echo "Built notes-html/index.html ✅"
