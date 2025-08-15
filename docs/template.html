@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>template</title>
+    <link rel="stylesheet" href="notes.css?v=20250815145826" />
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="review.html">← Back to Literature Review</a>
+  <span> · </span>
+  <a href="index.html">All notes</a>
+</nav>
+
+<header class="page-header">
+  <p class="last-updated">Last updated <span id="last-updated"></span></p>
+  <h1 class="title"><Paper title here></h1>
+  <h3 class="authors"><Authors here></h3>
+</header>
+
+<main id="content">
+<h2 id="summary">Summary</h2>
+<ul>
+<li><strong>What is the author saying?</strong><br />
+<Your summary here></li>
+</ul>
+<h2 id="relevance">Relevance</h2>
+<ul>
+<li><strong>How is it relevant to your research?</strong><br />
+<Your notes here></li>
+</ul>
+<h2 id="critical-appraisal">Critical appraisal</h2>
+<ul>
+<li><strong>Strengths</strong><br />
+<Points here></li>
+<li><strong>Weaknesses / Gaps</strong><br />
+<Points here></li>
+</ul>
+<h2 id="key-quotes">Key quotes</h2>
+<ul>
+<li>“<Quote>” (p. X)</li>
+</ul>
+<h2 id="related-works">Related works</h2>
+</main>
+
+<script>
+  // Put the file’s modified date under the authors line
+  (function () {
+    var el = document.getElementById('last-updated');
+    if (el) el.textContent = new Date(document.lastModified)
+      .toLocaleDateString(undefined, { day:'2-digit', month:'long', year:'numeric' });
+  }());
+</script>
+
+</body>
+</html>
