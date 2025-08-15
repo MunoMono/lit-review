@@ -21,28 +21,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Keep Pages happy (environment setup)
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Setup Pandoc (stable)
+      # Known-good Pandoc (no apt race / old versions)
+      - name: Setup Pandoc
         uses: r-lib/actions/setup-pandoc@v2
         with:
-          pandoc-version: '3.1.11'  # stable, includes citeproc
+          pandoc-version: '3.1.11'
 
-      - name: Tool versions
+      - name: Print tool versions
         run: |
           set -eux
-          pandoc -v | head -n 2
-          python3 --version
+          pandoc -v | head -n 3
+          python3 --version || true
           lua -v || true
 
       - name: Build site
+        shell: bash
         run: |
           set -euxo pipefail
           chmod +x scripts/build-notes.sh
           ./scripts/build-notes.sh
 
       - name: List build output
+        shell: bash
         run: |
           set -eux
           echo "::group::notes-html"
@@ -52,6 +56,85 @@ jobs:
           test -f notes-html/review.html
 
       - name: Sanity check references
+        shell: bash
+        run: |
+          set -eux
+          ! grep -q 'Lee, J. (2018)' notes-html/review.html
+          ! grep -q 'Smith, J. (2020)' notes-html/review.html
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: notes-html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4name: Build & Deploy (Pages)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Keep Pages happy (environment setup)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      # Known-good Pandoc (no apt race / old versions)
+      - name: Setup Pandoc
+        uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: '3.1.11'
+
+      - name: Print tool versions
+        run: |
+          set -eux
+          pandoc -v | head -n 3
+          python3 --version || true
+          lua -v || true
+
+      - name: Build site
+        shell: bash
+        run: |
+          set -euxo pipefail
+          chmod +x scripts/build-notes.sh
+          ./scripts/build-notes.sh
+
+      - name: List build output
+        shell: bash
+        run: |
+          set -eux
+          echo "::group::notes-html"
+          ls -lah notes-html
+          echo "::endgroup::"
+          test -f notes-html/index.html
+          test -f notes-html/review.html
+
+      - name: Sanity check references
+        shell: bash
         run: |
           set -eux
           ! grep -q 'Lee, J. (2018)' notes-html/review.html
