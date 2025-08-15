@@ -45,8 +45,8 @@ for f in "${note_files[@]}"; do
   echo "Built notes-html/${base}.html"
 done
 
-# ---------- 2) Build index: FULL Harvard refs linking to notes ----------
-# a) Build nocite list from citation_key in each note
+# ---------- 2) Build index: FULL Harvard refs linking to notes (with fallback) ----------
+# a) Build nocite list from citation_key in each note and also capture fallback label parts
 tmp_map="$(mktemp --suffix=.tsv)"
 tmp_refs_md="$(mktemp --suffix=.md)"
 {
@@ -56,11 +56,44 @@ tmp_refs_md="$(mktemp --suffix=.md)"
   echo 'nocite: |'
   for f in "${note_files[@]}"; do
     base="$(basename "$f" .md)"
+    # citation_key
     key_line="$(grep -m1 -E '^[[:space:]]*citation_key[[:space:]]*:' "$f" || true)"
     [[ -z "${key_line:-}" ]] && continue
     key="${key_line#*:}"; key="${key//\"/}"; key="${key//\'/}"; key="$(echo "$key" | tr -d '[:space:]')"
     [[ -z "$key" ]] && continue
-    printf '%s\t%s\n' "$key" "$base" >> "$tmp_map"
+
+    # metadata (fallback label)
+    title="$(  grep -m1 -E '^[[:space:]]*title[[:space:]]*:'   "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//' )"
+    authors="$(grep -m1 -E '^[[:space:]]*authors[[:space:]]*:' "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//' )"
+    year="$(   grep -m1 -E '^[[:space:]]*year[[:space:]]*:'    "$f" | sed -E 's/^[^:]*:[[:space:]]*//; s/^"//; s/"$//' )"
+
+    # Simple author label: "Surname and Surname" (for fallback only)
+    IFS=';' read -r -a arr <<<"${authors:-}"
+    surnames=()
+    for a in "${arr[@]}"; do
+      a="$(echo "$a" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+      [[ -z "$a" ]] && continue
+      s="$(echo "$a" | awk '{print $NF}')"
+      [[ -n "$s" ]] && surnames+=("$s")
+    done
+    short_auth=""
+    if ((${#surnames[@]}==1)); then
+      short_auth="${surnames[0]}"
+    elif ((${#surnames[@]}==2)); then
+      short_auth="${surnames[0]} and ${surnames[1]}"
+    elif ((${#surnames[@]}>2)); then
+      short_auth="${surnames[0]} et al."
+    fi
+    [[ -z "$short_auth" ]] && short_auth="${authors:-Unknown}"
+    [[ -z "${year:-}"  ]] && year="n.d."
+
+    # Fallback label
+    fallback="${short_auth} (${year}) — ${title}"
+
+    # Map: key, base, fallback label (tab-separated; label last to allow tabs in earlier fields safely escaped)
+    printf '%s\t%s\t%s\n' "$key" "$base" "$fallback" >> "$tmp_map"
+
+    # nocite list for CSL
     echo "  @$key"
   done
   echo '---'
@@ -80,7 +113,7 @@ pandoc "$tmp_refs_md" \
   > "$refs_fragment"
 
 # c) Post-process: wrap each reference in a link to its note.
-#    If the key→basename mapping fails, fall back to ./KEY.html (and keep only those that exist).
+#    If CSL omitted a key, fall back to a label from YAML metadata.
 python3 - "$refs_fragment" "$tmp_map" notes-html/index.html <<'PY'
 import re, sys, pathlib, html
 
@@ -91,34 +124,50 @@ site_dir  = out_path.parent  # notes-html
 
 frag = frag_path.read_text(encoding="utf-8")
 
-# Load key->basename (from note filenames)
-key_to_base = {}
+# Load key->(base, fallback_label)
+key_to = {}
 if map_path.exists():
     for line in map_path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
-        key, base = line.split("\t", 1)
-        key_to_base[key.strip()] = base.strip()
+        parts = line.split("\t", 2)
+        if len(parts) < 3:
+            # older map format (key\tbase)
+            key, base = parts[0], parts[1] if len(parts) > 1 else parts[0]
+            key_to[key.strip()] = (base.strip(), key)
+        else:
+            key, base, fallback = parts
+            key_to[key.strip()] = (base.strip(), fallback.strip())
 
-# Pull the refs block
+# Extract CSL refs
 m_refs = re.search(r'(<div id="refs"[^>]*>.*?</div>)', frag, flags=re.DOTALL)
 refs_html = m_refs.group(1) if m_refs else ""
 
-# Build list items in CSL order
+# First, collect CSL-rendered entries and record which keys appeared
 items = []
+seen_keys = set()
 for m in re.finditer(r'<div id="ref-([^"]+)"[^>]*>(.*?)</div>', refs_html, flags=re.DOTALL):
     key = m.group(1)
     inner = m.group(2).strip()
+    seen_keys.add(key)
 
-    # Resolve link target: map key→base; else fallback base = key
-    base = key_to_base.get(key, key)
+    base, fallback = key_to.get(key, (key, key))
     target = site_dir / f"{base}.html"
     if not target.exists():
-        # skip entries that don't have a note page
         continue
-
     items.append(f'<li><a href="./{html.escape(base)}.html">{inner}</a></li>')
 
+# Now add any keys we *expected* but CSL did not output (fallback label)
+for key, (base, fallback) in key_to.items():
+    if key in seen_keys:
+        continue
+    target = site_dir / f"{base}.html"
+    if not target.exists():
+        continue
+    safe = html.escape(fallback or key)
+    items.append(f'<li><a href="./{html.escape(base)}.html">{safe}</a></li>')
+
+# Build the page
 page = f"""<!DOCTYPE html>
 <html lang="">
 <head>
