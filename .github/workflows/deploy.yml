@@ -27,6 +27,13 @@ jobs:
         with:
           pandoc-version: '3.1.11'
 
+      # 👇 Add this step
+      - name: Install Python deps (bs4 for index builder)
+        shell: bash
+        run: |
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user beautifulsoup4
+
       - name: Print tool versions
         shell: bash
         run: |

@@ -115,8 +115,3 @@ hr { border: 0; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
 @media (min-width: 900px) {
   body { max-width: 80ch; }
 }
-
-/* Center the leading citation line */
-.page-header p:first-of-type {
-  text-align: center !important;
-}
