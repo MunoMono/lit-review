@@ -1,6 +1,6 @@
 ---
 title: "The Future End of Design Work: A Critical Overview of Managerialism, Generative AI, and the Nature of Knowledge Work, and Why Craft Remains Relevant"
-citation_key: "Hernndez-Ramrez2024"
+citation_key: "hernandez-ramirez_future_2024"
 authors: "Rodrigo Hernández-Ramírez; João Batalheiro Ferreira"
 year: "2024"
 

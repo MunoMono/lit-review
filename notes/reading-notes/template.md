@@ -1,6 +1,5 @@
 ---
 title: "<Paper title here>"
-citation_key: "<BibTeX key here, e.g. Smith2020>"
 authors: "<Authors here>"
 year: "<Year>"
 
