@@ -19,16 +19,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # 🔒 Single source of truth for references & style during the build
+      # Single source of truth for refs & style
       BIB_PATH: refs/library.bib
       CSL_PATH: refs/harvard-cite-them-right.csl
-      # If your scripts accept env overrides, they’ll pick these up;
-      # if not, we still pass them and call pandoc with correct flags in scripts.
-      PANDOC_CITEPROC: "1"
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/configure-pages@v5
 
       # Known-good Pandoc (bundled citeproc)
@@ -36,24 +32,19 @@ jobs:
         with:
           pandoc-version: '3.1.11'
 
-      - name: Install Python deps (for index checker)
+      - name: Install Python deps (for index builder)
         run: |
           python3 -m pip install --user --upgrade pip
           python3 -m pip install --user beautifulsoup4
 
-      # ✅ Ensure refs/ has the CSL and your bibliography
+      # Ensure refs/ has CSL + bibliography
       - name: Prepare refs (CSL + bibliography)
         shell: bash
         run: |
           set -euxo pipefail
           mkdir -p refs
-
-          # 1) Harvard – Cite Them Right CSL (local copy)
           curl -fsSL -o "$CSL_PATH" https://www.zotero.org/styles/harvard-cite-them-right
-
-          # 2) Bibliography: expect your cleaned export to be committed as refs/library.bib
           test -f "$BIB_PATH" || { echo "Missing $BIB_PATH — commit your cleaned Zotero export to refs/library.bib"; exit 1; }
-
           echo "Using CSL: $CSL_PATH"
           echo "Using BIB: $BIB_PATH"
           head -n 3 "$BIB_PATH" || true
@@ -66,30 +57,20 @@ jobs:
           python3 --version || true
           uname -a
           echo "PWD=$(pwd)"
-          echo "Top-level tree:"
           ls -lah
 
-      # 🧱 Build: run your script, but force CSL/BIB via env + trace
+      # Build with env only; DO NOT repeat --csl/--bibliography
       - name: Build site (trace)
         shell: bash
         env:
-          CSL: ${{ env.CSL_PATH }}
-          BIB: ${{ env.BIB_PATH }}
+          CSL_STYLE: ${{ env.CSL_PATH }}
+          BIB:       ${{ env.BIB_PATH }}
+          # Extra flags without csl/bibliography (script adds those itself)
+          PANDOC_EXTRA_FLAGS: "--citeproc --metadata link-citations=true"
         run: |
           set -euxo pipefail
           umask 022
           chmod +x scripts/build-notes.sh
-
-          # If your script accepts env overrides, export them
-          export CSL_STYLE="$CSL"
-          export CSL_DEFAULT="$CSL"
-          export BIBLIOGRAPHY="$BIB"
-          export BIB_DEFAULT="$BIB"
-
-          # Optional: many users patch pandoc flags via an env
-          export PANDOC_EXTRA_FLAGS="--citeproc --bibliography=$BIB --csl=$CSL --metadata link-citations=true"
-
-          # Run with trace and capture logs
           bash -x ./scripts/build-notes.sh 2>&1 | tee build.log
 
       - name: List build output
@@ -97,24 +78,18 @@ jobs:
         shell: bash
         run: |
           set -eux
-          echo "::group::notes-html"
           ls -lah notes-html || true
-          echo "::endgroup::"
           test -f notes-html/index.html
           test -f notes-html/review.html
 
-      # 🚨 Basic sanity checks so wrong styles/old bibs don’t slip through
       - name: Sanity check references
         shell: bash
         run: |
           set -eux
-          # Known bad placeholders that should never appear
           ! grep -qi 'Lee, J. (2018)' notes-html/review.html || (echo "Unexpected placeholder citation."; exit 1)
           ! grep -qi 'Smith, J. (2020)' notes-html/review.html || (echo "Unexpected placeholder citation."; exit 1)
-          # If pandoc missed citeproc, you sometimes get square-bracketed keys:
           ! grep -q '\[\@' notes-html/review.html || (echo "Unprocessed citation keys detected — citeproc likely not applied."; exit 1)
 
-      # Upload logs and the built folder so we can inspect even on failure
       - name: Upload debug logs
         if: always()
         uses: actions/upload-artifact@v4
