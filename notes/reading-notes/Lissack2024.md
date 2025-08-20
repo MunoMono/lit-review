@@ -1,5 +1,5 @@
 ---
-title: "Responsible Use of Large Language Models: An Analogy with the Oxford Tutorial System"
+title: "Responsible use of large language models: An analogy with the Oxford tutorial system"
 citation_key: "lissack_responsible_2024"
 authors: "Michael Lissack; Brenden Meagher"
 year: "2024"
