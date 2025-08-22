@@ -35,6 +35,7 @@ FILTER_ARGS=()
 [[ -f filters/citations-in-lists.lua     ]] && FILTER_ARGS+=(--lua-filter=filters/citations-in-lists.lua)
 [[ -f filters/keep-refs.lua              ]] && FILTER_ARGS+=(--lua-filter=filters/keep-refs.lua)
 [[ -f filters/sentence-case-title.lua    ]] && FILTER_ARGS+=(--lua-filter=filters/sentence-case-title.lua)
+[[ -f filters/hide-citekey.lua ]] && FILTER_ARGS+=(--lua-filter=filters/hide-citekey.lua)
 
 # Pandoc flags (citeproc + link-citations by default)
 EXTRA_FLAGS=()

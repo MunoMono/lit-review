@@ -27,11 +27,14 @@
 <header class="page-header">
   <p class="last-updated">Last updated <span id="last-updated"></span></p>
   <h1 class="title">$title$</h1>
-  $if(authors)$
-  <p class="byline">
-    <em>$for(authors)$$authors$$sep$, $endfor$</em>$if(year)$ • $year$$endif$$if(journal)$ • <em class="journal">$journal$</em>$endif$
-  </p>
-  $endif$
+  $if(authors)$<h3 class="authors">$authors$</h3>$endif$
+  $if(year)$$if(journal)$
+  <p class="byline"><em>$journal$</em> · $year$</p>
+  $elseif(year)$
+  <p class="byline">$year$</p>
+  $elseif(journal)$
+  <p class="byline"><em>$journal$</em></p>
+  $endif$$endif$
 </header>
 
 <main id="content">
