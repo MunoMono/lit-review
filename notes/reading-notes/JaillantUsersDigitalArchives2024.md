@@ -10,7 +10,6 @@ bibliography: ../../refs/library.bib
 csl: "https://www.zotero.org/styles/harvard-cite-them-right"
 link-citations: true
 ---
-citation_key: "jaillantAreUsersDigital2024"
 
 ## Purpose/aim
 - Investigates whether **scholars and users of digital archives** are ready to adopt AI and computational research methods.  
