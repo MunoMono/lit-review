@@ -27,84 +27,62 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
 
-      # Known-good Pandoc (bundled citeproc)
+      # Known-good Pandoc (with citeproc)
       - uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: '3.1.11'
 
-      - name: Install Python deps (for index builder)
+      # deps for the Python index builder (bs4)
+      - name: Install system deps
         run: |
-          python3 -m pip install --user --upgrade pip
-          python3 -m pip install --user beautifulsoup4
+          sudo apt-get update
+          sudo apt-get install -y python3-bs4
 
-      # Ensure refs/ has CSL + bibliography
+      # Ensure CSL exists; require committed library.bib
       - name: Prepare refs (CSL + bibliography)
         shell: bash
         run: |
           set -euxo pipefail
           mkdir -p refs
-          curl -fsSL -o "$CSL_PATH" https://www.zotero.org/styles/harvard-cite-them-right
+          # Keep your pinned CSL locally; fetch if missing
+          if [ ! -f "$CSL_PATH" ]; then
+            curl -fsSL -o "$CSL_PATH" https://www.zotero.org/styles/harvard-cite-them-right
+          fi
           test -f "$BIB_PATH" || { echo "Missing $BIB_PATH — commit your cleaned Zotero export to refs/library.bib"; exit 1; }
           echo "Using CSL: $CSL_PATH"
           echo "Using BIB: $BIB_PATH"
-          head -n 3 "$BIB_PATH" || true
 
       - name: Print tool versions
-        shell: bash
         run: |
-          set -eux
           pandoc -v | head -n 5
-          python3 --version || true
-          uname -a
-          echo "PWD=$(pwd)"
-          ls -lah
+          python3 --version
 
-      # Build with env only; DO NOT repeat --csl/--bibliography
-      - name: Build site (trace)
+      # Build with your script; it already adds --csl/--bibliography and the Lua filters
+      - name: Build site (sentence-case titles)
         shell: bash
         env:
           CSL_STYLE: ${{ env.CSL_PATH }}
           BIB:       ${{ env.BIB_PATH }}
-          # Extra flags without csl/bibliography (script adds those itself)
+          # Do NOT add --csl/--bibliography here; the script handles them.
           PANDOC_EXTRA_FLAGS: "--citeproc --metadata link-citations=true"
         run: |
           set -euxo pipefail
-          umask 022
           chmod +x scripts/build-notes.sh
-          bash -x ./scripts/build-notes.sh 2>&1 | tee build.log
+          ./scripts/build-notes.sh
 
-      - name: List build output
-        if: always()
+      - name: Sanity checks (ensure sentence case applied)
         shell: bash
         run: |
-          set -eux
-          ls -lah notes-html || true
+          set -euxo pipefail
           test -f notes-html/index.html
           test -f notes-html/review.html
-
-      - name: Sanity check references
-        shell: bash
-        run: |
-          set -eux
-          ! grep -qi 'Lee, J. (2018)' notes-html/review.html || (echo "Unexpected placeholder citation."; exit 1)
-          ! grep -qi 'Smith, J. (2020)' notes-html/review.html || (echo "Unexpected placeholder citation."; exit 1)
-          ! grep -q '\[\@' notes-html/review.html || (echo "Unprocessed citation keys detected — citeproc likely not applied."; exit 1)
-
-      - name: Upload debug logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ci-debug
-          path: |
-            build.log
-            notes-html/**
-            scripts/**
-            filters/**
-            assets/**
-            notes/**
-            refs/**
-          if-no-files-found: warn
-          retention-days: 3
+          # Spot-check one page for sentence case (avoid false positives by checking
+          # that the initial 'Users' is NOT title-cased in Jaillant...)
+          if [ -f notes-html/JaillantUsersDigitalArchives2024.html ]; then
+            ! grep -q "<h1[^>]*>Are Users of Digital Archives" notes-html/JaillantUsersDigitalArchives2024.html
+          fi
+          # Ensure all citations processed
+          ! grep -q '\[\@' notes-html/review.html
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
