@@ -1,16 +1,16 @@
 ---
 title: "Are Users of Digital Archives Ready for the AI Era? Obstacles to the Application of Computational Research Methods and New Opportunities"
 authors: "Jaillant, Lise; Aske, Katherine"
-year: "2024"
+year: 2024
 journal: "ACM Journal on Computing and Cultural Heritage"
-citation_key: "jaillantUsersDigitalArchives2024"
-doi: "10.1145/3631125"
+citation_key: jaillantAreUsersDigital2024
+doi: 10.1145/3631125
 url: "https://doi.org/10.1145/3631125"
-
 bibliography: ../../refs/library.bib
-csl: https://www.zotero.org/styles/harvard-cite-them-right
+csl: "https://www.zotero.org/styles/harvard-cite-them-right"
 link-citations: true
 ---
+citation_key: "jaillantAreUsersDigital2024"
 
 ## Purpose/aim
 - Investigates whether **scholars and users of digital archives** are ready to adopt AI and computational research methods.  

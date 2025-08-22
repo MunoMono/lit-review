@@ -1,14 +1,13 @@
 ---
 title: "New Design Knowledge and the Fifth Order of Design"
 authors: "Mortati, Marzia"
-year: "2022"
+year: 2022
 journal: "Design Issues"
-citation_key: "mortatiNewDesignKnowledge2022"
-doi: "10.1162/desi_a_00695"
+citation_key: mortatiNewDesignKnowledge2022
+doi: 10.1162/desi_a_00695
 url: "https://doi.org/10.1162/desi_a_00695"
-
 bibliography: ../../refs/library.bib
-csl: https://www.zotero.org/styles/harvard-cite-them-right
+csl: "https://www.zotero.org/styles/harvard-cite-them-right"
 link-citations: true
 ---
 
