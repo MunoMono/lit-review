@@ -1,4 +1,4 @@
-# Literature Review Toolkit
+# Literature review toolkit
 
 A lightweight, scalable workflow for managing a literature review with **Markdown**, **Pandoc**, and **GitHub Pages**.
 
@@ -18,7 +18,7 @@ Live version: [https://munomono.github.io/literature-review/review.html](https:/
 
 ---
 
-## 📂 Project Structure
+## 📂 Project structure
 
 ```
 lit-review/
@@ -36,7 +36,7 @@ lit-review/
 
 ---
 
-## 🖋 Writing Workflow
+## 🖋 Writing workflow
 
 ### 1. Create a new reading note
 
