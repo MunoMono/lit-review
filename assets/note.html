@@ -8,6 +8,13 @@
   $header-includes$
   $endfor$
   <link rel="stylesheet" href="notes.css" />
+  <style>
+    .page-header { text-align: center; }
+    .last-updated { margin: 0 0 .5rem; color: #555; }
+    .byline { margin: .25rem 0 1.25rem; }
+    .byline .journal { font-style: italic; }
+    nav.top-nav { margin-bottom: 1rem; }
+  </style>
 </head>
 <body>
 
@@ -20,7 +27,11 @@
 <header class="page-header">
   <p class="last-updated">Last updated <span id="last-updated"></span></p>
   <h1 class="title">$title$</h1>
-  $if(authors)$<h3 class="authors">$authors$</h3>$endif$
+  $if(authors)$
+  <p class="byline">
+    <em>$for(authors)$$authors$$sep$, $endfor$</em>$if(year)$ • $year$$endif$$if(journal)$ • <em class="journal">$journal$</em>$endif$
+  </p>
+  $endif$
 </header>
 
 <main id="content">
@@ -28,7 +39,7 @@ $body$
 </main>
 
 <script>
-  // Put the file’s modified date under the authors line
+  // Put the file’s modified date under the title
   (function () {
     var el = document.getElementById('last-updated');
     if (el) el.textContent = new Date(document.lastModified)
