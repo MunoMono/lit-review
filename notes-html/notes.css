@@ -29,6 +29,8 @@ body {
 
 .title {
   margin: 0.25rem 0;
+  /* Force sentence case: disable GitHub Pages/theme auto-capitalization */
+  text-transform: none !important;
 }
 
 .authors {

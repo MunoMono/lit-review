@@ -4,19 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>template</title>
-    <link rel="stylesheet" href="notes.css" />
+    <link rel="stylesheet" href="notes.css?v=44ed3e9" />
   <style>
     .page-header { text-align: center; }
     .last-updated { margin: 0 0 .5rem; color: #555; }
     .byline { margin: .25rem 0 1.25rem; }
     .byline .journal { font-style: italic; }
     nav.top-nav { margin-bottom: 1rem; }
+
+    /* FORCE sentence case even if some global CSS tries to capitalize */
+    .title { text-transform: none !important; }
   </style>
 </head>
 <body>
 
 <nav class="top-nav">
-  <a href="review.html">← Back to Literature Review</a>
+  <a href="review.html">← Back to literature review</a>
   <span> · </span>
   <a href="index.html">All notes</a>
 </nav>

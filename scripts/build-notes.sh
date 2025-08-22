@@ -10,6 +10,9 @@ shopt -s nullglob
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# unique build id (commit hash or timestamp)
+BUILD_ID="$(git rev-parse --short HEAD 2>/dev/null || date +%s)"
+
 CSL_STYLE="${CSL_STYLE:-https://www.zotero.org/styles/harvard-cite-them-right}"
 BIB_PATH="${BIB:-${BIBLIOGRAPHY:-refs/library.bib}}"
 
@@ -43,6 +46,9 @@ if [[ -n "${PANDOC_EXTRA_FLAGS:-}" ]]; then EXTRA_FLAGS=(${PANDOC_EXTRA_FLAGS});
 [[ " ${EXTRA_FLAGS[*]-} " != *" --citeproc "* ]] && EXTRA_FLAGS+=(--citeproc)
 [[ " ${EXTRA_FLAGS[*]-} " != *" --metadata link-citations=true "* ]] && EXTRA_FLAGS+=(--metadata link-citations=true)
 
+# unique build id (commit hash or timestamp)
+BUILD_ID="$(git rev-parse --short HEAD 2>/dev/null || date +%s)"
+EXTRA_FLAGS+=(--metadata=build_id="$BUILD_ID")
 # Source notes
 note_files=(notes/reading-notes/*.md)
 
