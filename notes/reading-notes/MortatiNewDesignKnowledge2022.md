@@ -32,6 +32,23 @@ link-citations: true
 - Where Mortati emphasises reflexivity and institutional critique, my work operationalises this through the **integrated research spine** [oai_citation:5‡research-methods-spine.docx](file-service://file-8NbCxS954PQdexv8vsbn7R)—bringing archival methods into practice-based testing and computational simulation.  
 - Her argument strengthens my claim that **design methods are not neutral tools** but carriers of epistemic and political commitments.
 
+## Project integration
+- **Why it helps the project (evidence-linked)**  
+  - Grounds a **“fifth-order” framing** for initiatives combining human workflows, algorithmic adaptation, and living contexts (machines/micro-organisms as agents). Cite inline where used (e.g., ``[@mortatiNewDesignKnowledge2023]``).  [oai_citation:8‡desi_a_00695.pdf](file-service://file-Mefn2fd5W7aXaPx55LeG7m)  
+  - Supports shifting milestones from “final outputs” to **learning systems** with accountable iteration (“good enough for now”).  [oai_citation:9‡desi_a_00695.pdf](file-service://file-Mefn2fd5W7aXaPx55LeG7m)  
+  - Validates **designer ↔ data-science** collaboration focusing on feedback loops, uncertainty, and harm-avoidance.  [oai_citation:10‡desi_a_00695.pdf](file-service://file-Mefn2fd5W7aXaPx55LeG7m)  
+- **Hooks into the project**  
+  - Workstreams: problem-seeking & scoping; data ethics/attention-risk review; data-physicalization or other **mixed-data** sense-making; feedback-loop instrumentation; uncertainty UX patterns.  
+  - Deliverables/decisions: service metrics emphasize **learning velocity** and harm reduction; representation standards for systemic maps and scenario artifacts.  
+  - Stakeholders: design, data science, policy/ethics, affected communities, and operators of algorithmic systems.  
+- **Use across the methods spine**  
+  - `[x]` Framing / theory  
+  - `[x]` Study design  
+  - `[x]` Data collection / instruments  
+  - `[x]` Analysis / models  
+  - `[x]` Synthesis / interpretation  
+  - `[x]` Reporting / comms
+
 ## Critical evaluation
 **Strengths**
 - Frames design knowledge production within broader societal and institutional logics—important corrective to insular design methods discourse.  

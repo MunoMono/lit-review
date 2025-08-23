@@ -33,7 +33,25 @@ link-citations: true
 - Connects directly to my project’s concern with **epistemic infrastructures of knowledge**.  
 - Highlights the same tension I face in re-evaluating DDR models: the field often **lacks computational readiness** but cannot ignore AI-driven change.  
 - Resonates with my interest in **institutional logics** (cf. Mortati’s Fifth Order): archives and research cultures shape what knowledge “counts”.  
-- Reinforces the methodological spine of my work [oai_citation:0‡research-methods-spine.docx](file-service://file-8NbCxS954PQdexv8vsbn7R): combining archival analysis with computational tools requires more than technique; it demands cultural and structural shifts.
+- Reinforces the methodological spine of my work [oai_citation:0‡research-methods-spine.docx](file-service://file-8NbCxS954PQdexv8vsbn7R): combining archival analysis with computational tools requires more than technique; it demands cultural 
+and structural shifts.
+
+## Project integration
+- **Why it helps the project (evidence-linked)**  
+  - Quantifies user pain points we target (availability **86%**, discoverability **68%**, access for computation/online **64%**, search **59%**).  
+  - Justifies skills programme (self-taught majority; only **32%** confident at scale; **64%** request training).  
+  - Codifies **reproducibility & transparency** norms (log tools/versions; document selection/OCR/metadata).  [oai_citation:9‡3631125.pdf](file-service://file-ATUDzZT2Y5K4xfd54ofwBZ)  
+- **Hooks into the project**  
+  - Workstreams: access & rights triage; metadata/OCR remediation; researcher dashboard/search; training sprints; reproducibility checklist; GLAM collaboration MoUs.  
+  - Deliverables/decisions: archive prioritisation; remote-access requirements; text-mining stack; doc standards for provenance.  
+  - Stakeholders: GLAM partners, PI/co-Is, data stewards, PG researchers.  
+- **Use across the methods spine**  
+  - `[x]` Framing / theory  
+  - `[x]` Study design  
+  - `[x]` Data collection / instruments  
+  - `[x]` Analysis / models  
+  - `[x]` Synthesis / interpretation  
+  - `[x]` Reporting / comms
 
 ## Critical evaluation
 **Strengths**
