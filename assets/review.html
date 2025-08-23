@@ -4,7 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+
+  <!-- Base stylesheet -->
   <link rel="stylesheet" href="notes.css" />
+
+  <!-- IBM Plex (Carbon) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -12,15 +19,17 @@
   <a href="index.html">All notes</a>
 </nav>
 
-<header class="page-header">
-  <p class="last-updated">Last updated <span id="last-updated"></span></p>
-  <h1 class="title">$title$</h1>
-  $if(author)$<h3 class="authors">$for(author)$$author$$sep$ · $endfor$</h3>$endif$
-</header>
+<div class="cds-prose">
+  <header class="page-header">
+    <p class="last-updated">Last updated <span id="last-updated"></span></p>
+    <h1 class="title">$title$</h1>
+    $if(author)$<h3 class="authors">$for(author)$$author$$sep$ · $endfor$</h3>$endif$
+  </header>
 
-<main id="content">
-$body$
-</main>
+  <main id="content">
+  $body$
+  </main>
+</div>
 
 <script>
   (function () {

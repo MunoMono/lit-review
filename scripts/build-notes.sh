@@ -312,10 +312,11 @@ entries = list(refs_div.select("div.csl-entry[id^=ref-]")) if refs_div else []
 out = BeautifulSoup(
     "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'/>"
     "<meta name='viewport' content='width=device-width, initial-scale=1.0'/>"
-    "<title>Reading notes list</title><link rel='stylesheet' href='notes.css'/></head><body></body></html>",
+    "<title>Reading notes list</title><link rel='stylesheet' href='notes.css'/></head>"
+    "<body><div class='cds-prose'></div></body></html>",
     "html.parser"
 )
-body = out.body
+body = out.body.find('div', class_='cds-prose')
 nav = out.new_tag("nav", **{"class": "top-nav"})
 back = out.new_tag("a", href="review.html"); back.string = "← Back to Literature Review"
 nav.append(back); body.append(nav)
@@ -386,3 +387,13 @@ missing = sorted(k for k in cited if k not in bib)
 print("Citations OK: all note citations resolve in refs/library.bib ✅" if not missing else
       "⚠︎ Missing citation keys:\n  - " + "\n  - ".join(missing))
 PY
+
+# ── 6) Publish to docs (for GitHub Pages) ──────────────────────────────────────
+if command -v rsync >/dev/null 2>&1; then
+  mkdir -p docs
+  rsync -a --delete notes-html/ docs/
+else
+  mkdir -p docs
+  rm -rf docs/*
+  cp -a notes-html/. docs/
+fi

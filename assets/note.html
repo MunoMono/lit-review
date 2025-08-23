@@ -7,7 +7,15 @@
   $for(header-includes)$
   $header-includes$
   $endfor$
+
+  <!-- Base stylesheet -->
   <link rel="stylesheet" href="notes.css?v=$build_id$" />
+
+  <!-- IBM Plex (Carbon) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     .page-header { text-align: center; }
     .last-updated { margin: 0 0 .5rem; color: #555; }
@@ -15,7 +23,7 @@
     .byline .journal { font-style: italic; }
     nav.top-nav { margin-bottom: 1rem; }
 
-    /* FORCE sentence case even if some global CSS tries to capitalize */
+    /* FORCE sentence case even if some global CSS tries to capitalise */
     .title { text-transform: none !important; }
   </style>
 </head>
@@ -27,22 +35,24 @@
   <a href="index.html">All notes</a>
 </nav>
 
-<header class="page-header">
-  <p class="last-updated">Last updated <span id="last-updated"></span></p>
-  <h1 class="title">$title$</h1>
-  $if(authors)$<h3 class="authors">$authors$</h3>$endif$
-  $if(year)$$if(journal)$
-  <p class="byline"><em>$journal$</em> · $year$</p>
-  $elseif(year)$
-  <p class="byline">$year$</p>
-  $elseif(journal)$
-  <p class="byline"><em>$journal$</em></p>
-  $endif$$endif$
-</header>
+<div class="cds-prose">
+  <header class="page-header">
+    <p class="last-updated">Last updated <span id="last-updated"></span></p>
+    <h1 class="title">$title$</h1>
+    $if(authors)$<h3 class="authors">$authors$</h3>$endif$
+    $if(year)$$if(journal)$
+    <p class="byline"><em>$journal$</em> · $year$</p>
+    $elseif(year)$
+    <p class="byline">$year$</p>
+    $elseif(journal)$
+    <p class="byline"><em>$journal$</em></p>
+    $endif$$endif$
+  </header>
 
-<main id="content">
-$body$
-</main>
+  <main id="content">
+  $body$
+  </main>
+</div>
 
 <script>
   // Put the file’s modified date under the title

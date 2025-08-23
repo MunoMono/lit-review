@@ -1,169 +1,192 @@
-/* Notes — IBM Plex styled typography & polish
-   ------------------------------------------- */
+/* Load IBM Plex for pages that don't inject a <link> (e.g., generated index) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+/* =========================================================
+   Carbon-ish typography: IBM Plex + expressive type scale
+   ========================================================= */
+:root{
+  --cds-font-sans: 'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
+  --cds-font-serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --cds-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-/* IBM Plex Sans/Serif/Mono */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Serif:wght@300;400;600&family=IBM+Plex+Mono:wght@300;400;600&display=swap");
+  /* Body (expressive base 16px) */
+  --cds-body-long-02-size: 1rem;      /* 16px */
+  --cds-body-long-02-line: 1.5;       /* 24px */
+  --cds-body-long-01-size: .875rem;   /* 14px */
+  --cds-body-long-01-line: 1.25;      /* 20px */
 
-/* ----------------------------------------------------- */
-/* Tokens                                                */
-/* ----------------------------------------------------- */
-:root {
-  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* Headings (expressive) */
+  --cds-heading-05-size: 2.625rem;    /* 42px */
+  --cds-heading-05-line: 1.2;
+  --cds-heading-05-weight: 300;
 
-  --text: #161616;          /* Gray 90 */
-  --muted: #525252;         /* Gray 50 */
-  --bg: #ffffff;
-  --border: #e0e0e0;        /* Gray 20 */
-  --link: #0f62fe;          /* Blue 60 */
-  --link-hover: #0043ce;    /* Blue 70 */
-  --code-bg: #f4f4f4;       /* Gray 10 */
+  --cds-heading-04-size: 1.75rem;     /* 28px */
+  --cds-heading-04-line: 1.285;       /* 36px */
+  --cds-heading-04-weight: 400;
 
-  --step--1: clamp(.88rem, .86rem + .2vw, .95rem);
-  --step-0:  clamp(1.00rem, .96rem + .35vw, 1.10rem);
-  --step-1:  clamp(1.20rem, 1.08rem + .7vw, 1.40rem);
-  --step-2:  clamp(1.40rem, 1.14rem + 1.2vw, 1.75rem);
-  --step-3:  clamp(1.70rem, 1.18rem + 1.8vw, 2.10rem);
+  --cds-heading-03-size: 1.25rem;     /* 20px */
+  --cds-heading-03-line: 1.4;         /* 28px */
+  --cds-heading-03-weight: 400;
 
-  --max-measure: 80ch;
-  --rhythm: 1.25rem;
-  --radius: 6px;
+  --cds-heading-02-size: 1rem;        /* 16px */
+  --cds-heading-02-line: 1.5;         /* 24px */
+  --cds-heading-02-weight: 600;
+
+  --cds-heading-01-size: .875rem;     /* 14px */
+  --cds-heading-01-line: 1.25;        /* 20px */
+  --cds-heading-01-weight: 600;
+  --cds-heading-01-letter: .16px;
+
+  /* Quotation */
+  --cds-quotation-01-size: 1.5rem;    /* 24px */
+  --cds-quotation-01-line: 1.25;      /* 30px */
+
+  /* Colors */
+  --cds-text-100: #161616;   /* Gray 100 */
+  --cds-text-70:  #525252;   /* Gray 70 */
+  --cds-border:   #e0e0e0;
+  --cds-bg-subtle:#f4f4f4;
+  --cds-link:     #0f62fe;   /* IBM Blue 60 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #f4f4f4;
-    --muted: #c6c6c6;
-    --bg: #161616;
-    --border: #393939;
-    --link: #78a9ff;
-    --link-hover: #a6c8ff;
-    --code-bg: #262626;
-  }
+/* Scope Carbon type to document content */
+.cds-prose, .cds-prose :where(*) { box-sizing: border-box; }
+.cds-prose {
+  font-family: var(--cds-font-sans);
+  font-size: var(--cds-body-long-02-size);
+  line-height: var(--cds-body-long-02-line);
+  color: var(--cds-text-100);
+  letter-spacing: 0;
 }
 
-/* ----------------------------------------------------- */
-/* Base                                                  */
-/* ----------------------------------------------------- */
-html { box-sizing: border-box; -webkit-text-size-adjust: 100%; }
+/* Headings mapping (expressive) */
+.cds-prose h1 {
+  font: var(--cds-heading-05-weight) var(--cds-heading-05-size)/var(--cds-heading-05-line) var(--cds-font-sans);
+  margin: 0 0 .75rem;
+}
+.cds-prose h2 {
+  font: var(--cds-heading-04-weight) var(--cds-heading-04-size)/var(--cds-heading-04-line) var(--cds-font-sans);
+  margin: 2rem 0 .5rem;
+}
+.cds-prose h3 {
+  font: var(--cds-heading-03-weight) var(--cds-heading-03-size)/var(--cds-heading-03-line) var(--cds-font-sans);
+  margin: 1.5rem 0 .25rem;
+}
+.cds-prose h4 {
+  font: var(--cds-heading-02-weight) var(--cds-heading-02-size)/var(--cds-heading-02-line) var(--cds-font-sans);
+  margin: 1rem 0 .25rem;
+}
+.cds-prose h5 {
+  font: var(--cds-heading-01-weight) var(--cds-heading-01-size)/var(--cds-heading-01-line) var(--cds-font-sans);
+  letter-spacing: var(--cds-heading-01-letter);
+  margin: .75rem 0 .25rem;
+}
+.cds-prose h6 {
+  font: 600 .75rem/1.125rem var(--cds-font-sans);
+  letter-spacing: .16px;
+  margin: .5rem 0 .25rem;
+}
+
+/* Paragraphs, captions */
+.cds-prose p { margin: 0 0 1rem; }
+.cds-prose small,
+.cds-prose .caption { font: 400 var(--cds-body-long-01-size)/var(--cds-body-long-01-line) var(--cds-font-sans); letter-spacing: .16px; color: var(--cds-text-70); }
+
+/* Links */
+.cds-prose a { color: var(--cds-link); text-decoration: none; }
+.cds-prose a:hover { text-decoration: underline; }
+
+/* Quotes use Plex Serif */
+.cds-prose blockquote {
+  font: 400 var(--cds-quotation-01-size)/var(--cds-quotation-01-line) var(--cds-font-serif);
+  margin: 1rem 0; padding: .25rem 1rem; border-left: 4px solid #8d8d8d; color: #393939; background: #fafafa;
+}
+
+/* Code uses Plex Mono */
+.cds-prose code, .cds-prose pre, .cds-prose kbd { font-family: var(--cds-font-mono); }
+.cds-prose pre { background: var(--cds-bg-subtle); padding: .75rem; overflow:auto; border-radius: 6px; }
+.cds-prose code { background: var(--cds-bg-subtle); padding: .1rem .25rem; border-radius: 4px; }
+
+/* Lists, tables */
+.cds-prose ul, .cds-prose ol { margin: 0 0 1rem 1.25rem; }
+.cds-prose li { margin: .25rem 0; }
+.cds-prose table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
+.cds-prose th, .cds-prose td { border: 1px solid var(--cds-border); padding: .5rem; text-align: left; }
+.cds-prose thead th { background: #fafafa; }
+
+/* Citations & references */
+.cds-prose .citation a { text-decoration: none; color: inherit; border-bottom: 0; }
+.cds-prose .citation a:hover { text-decoration: underline; }
+.cds-prose .references {
+  margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--cds-border);
+  font: 400 var(--cds-body-long-01-size)/var(--cds-body-long-01-line) var(--cds-font-sans);
+}
+.cds-prose .references .csl-entry { margin: 0 0 .75rem 0; }
+.cds-prose .hanging-indent .csl-entry { margin-left: 2em; text-indent: -2em; }
+.cds-prose .csl-left-margin { min-width: 2em; float: left; }
+.cds-prose .csl-right-inline { margin-left: 2em; }
+.cds-prose .references::after { content: ""; display: table; clear: both; }
+
+/* TOC */
+.cds-prose #TOC { margin: 1rem 0 2rem; }
+.cds-prose #TOC a { text-decoration: none; color: inherit; }
+.cds-prose #TOC a:hover { text-decoration: underline; }
+
+/* =========================================================
+   Existing base layout (kept, lightly tuned to coexist)
+   ========================================================= */
+html { box-sizing: border-box; }
 *, *::before, *::after { box-sizing: inherit; }
 
 body {
-  margin: 0 auto;
-  padding: 0 1rem 3rem;
-  max-width: var(--max-measure);
   line-height: 1.6;
-  color: var(--text);
-  background: var(--bg);
-  font: 400 var(--step-0)/1.6 var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+  max-width: 70ch;
 }
 
-::selection { background: #d0e2ff; }
-
-/* Links */
-a {
-  color: var(--link);
-  text-decoration: none;
-  border-bottom: 1px solid color-mix(in oklab, var(--link) 60%, transparent);
-  transition: color .15s ease, border-color .15s ease;
+/* Header (timestamp, title, authors) */
+.page-header {
+  margin: 1.5rem 0 1rem;
+  text-align: center;
 }
-a:hover { color: var(--link-hover); border-color: currentColor; }
-a:focus-visible {
-  outline: 2px solid var(--link);
-  outline-offset: 2px;
-  border-bottom-color: transparent;
-}
-
-/* ----------------------------------------------------- */
-/* Header                                                */
-/* ----------------------------------------------------- */
-.page-header { margin: 1.5rem 0 1rem; text-align: center; }
-.last-updated { margin: 0 0 1rem; font-size: var(--step--1); color: var(--muted); }
-.title { margin: .25rem 0; font-size: var(--step-3); font-weight: 600; text-transform: none !important; }
-.authors { margin: .5rem 0 1rem; font-style: italic; color: var(--muted); }
+.last-updated { margin: 0 0 1rem; font-size: 0.95rem; opacity: 0.8; }
+.title { margin: 0.25rem 0; text-transform: none !important; }
+.authors { margin: 0.5rem 0 1rem; font-weight: 400; font-style: italic; }
 
 /* Top nav */
-.top-nav { margin: .75rem 0 1rem; font-size: var(--step--1); text-align: left; }
-.top-nav a { color: inherit; }
+.top-nav { margin: .75rem 0 1rem; font-size: .95rem; text-align: left; }
+.top-nav a { text-decoration: none; color: inherit; }
 .top-nav a:hover { text-decoration: underline; }
 
-/* ----------------------------------------------------- */
-/* Content                                               */
-/* ----------------------------------------------------- */
-h1, h2, h3, h4 { line-height: 1.25; font-weight: 600; margin: var(--rhythm) 0 .5rem; }
-h2 { font-size: var(--step-2); margin-top: 2rem; }
-h3 { font-size: var(--step-1); margin-top: 1.5rem; }
-h4 { font-size: var(--step-0); color: var(--muted); }
+/* Headings spacing extras (work with Carbon mapping above) */
+h1, h2, h3, h4 { line-height: 1.25; }
+h2 { margin-top: 2rem; }
+h3 { margin-top: 1.5rem; }
 
+/* General content spacing */
 p { margin: 0 0 1rem; }
 ul, ol { margin: 0 0 1rem 1.25rem; }
-li { margin: .25rem 0; }
+li { margin: 0.25rem 0; }
 
 blockquote {
   margin: 1rem 0;
-  padding: .5rem 1rem;
-  border-left: 3px solid var(--border);
-  background: color-mix(in oklab, var(--bg) 92%, transparent);
-  font-style: italic;
+  padding: 0.5rem 1rem;
+  border-left: 3px solid var(--cds-border);
+  background: #fafafa;
 }
 
-/* ----------------------------------------------------- */
-/* Code & Tables                                         */
-/* ----------------------------------------------------- */
-pre, code, kbd { font-family: var(--font-mono); }
-pre {
-  background: var(--code-bg);
-  padding: .75rem;
-  overflow: auto;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-}
-code {
-  background: var(--code-bg);
-  padding: .1rem .25rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-}
-
+/* Tables (base) */
 table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
-th, td { border: 1px solid var(--border); padding: .5rem; text-align: left; }
-thead th { background: color-mix(in oklab, var(--bg) 96%, transparent); }
+th, td { border: 1px solid #e5e5e5; padding: 0.5rem; text-align: left; }
+thead th { background: #fafafa; }
 
-/* ----------------------------------------------------- */
-/* References & Citations                                */
-/* ----------------------------------------------------- */
-.citation a { color: inherit; border-bottom: 0; }
-.citation a:hover { text-decoration: underline; }
-
-.references {
-  margin-top: 2.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  font-size: var(--step--1);
-  color: var(--muted);
-}
-.references .csl-entry { margin: 0 0 .75rem; }
-.hanging-indent .csl-entry { margin-left: 2em; text-indent: -2em; }
-.csl-left-margin { min-width: 2em; float: left; }
-.csl-right-inline { margin-left: 2em; }
-.references::after { content: ""; display: table; clear: both; }
-
-/* ----------------------------------------------------- */
-/* TOC                                                   */
-/* ----------------------------------------------------- */
-#TOC { margin: 1rem 0 2rem; }
-#TOC a { color: inherit; }
-#TOC a:hover { text-decoration: underline; }
-
-/* ----------------------------------------------------- */
-/* Utilities                                             */
-/* ----------------------------------------------------- */
+/* Utilities */
 img { max-width: 100%; height: auto; }
-hr { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; }
+hr { border: 0; border-top: 1px solid var(--cds-border); margin: 2rem 0; }
 
+/* Slightly wider layout on large screens */
 @media (min-width: 900px) {
-  body { max-width: var(--max-measure); }
+  body { max-width: 80ch; }
 }

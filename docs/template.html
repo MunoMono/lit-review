@@ -4,49 +4,156 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>template</title>
-    <link rel="stylesheet" href="notes.css?v=20250815145826" />
+  
+  <!-- Base stylesheet -->
+  <link rel="stylesheet" href="notes.css?v=32817e0" />
+
+  <!-- IBM Plex (Carbon) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    .page-header { text-align: center; }
+    .last-updated { margin: 0 0 .5rem; color: #555; }
+    .byline { margin: .25rem 0 1.25rem; }
+    .byline .journal { font-style: italic; }
+    nav.top-nav { margin-bottom: 1rem; }
+
+    /* FORCE sentence case even if some global CSS tries to capitalise */
+    .title { text-transform: none !important; }
+  </style>
 </head>
 <body>
 
 <nav class="top-nav">
-  <a href="review.html">← Back to Literature Review</a>
+  <a href="review.html">← Back to literature review</a>
   <span> · </span>
   <a href="index.html">All notes</a>
 </nav>
 
-<header class="page-header">
-  <p class="last-updated">Last updated <span id="last-updated"></span></p>
-  <h1 class="title"><Paper title here></h1>
-  <h3 class="authors"><Authors here></h3>
-</header>
+<div class="cds-prose">
+  <header class="page-header">
+    <p class="last-updated">Last updated <span id="last-updated"></span></p>
+    <h1 class="title"></h1>
+    <h3 class="authors"><Authors here></h3>
+        <p class="byline"><em><Journal name></em> · <Year></p>
+    
+  </header>
 
-<main id="content">
-<h2 id="summary">Summary</h2>
-<ul>
-<li><strong>What is the author saying?</strong><br />
-<Your summary here></li>
-</ul>
-<h2 id="relevance">Relevance</h2>
-<ul>
-<li><strong>How is it relevant to your research?</strong><br />
-<Your notes here></li>
-</ul>
-<h2 id="critical-appraisal">Critical appraisal</h2>
-<ul>
-<li><strong>Strengths</strong><br />
-<Points here></li>
-<li><strong>Weaknesses / Gaps</strong><br />
-<Points here></li>
-</ul>
-<h2 id="key-quotes">Key quotes</h2>
-<ul>
-<li>“<Quote>” (p. X)</li>
-</ul>
-<h2 id="related-works">Related works</h2>
-</main>
+  <main id="content">
+  <h2 id="purpose-and-aim">Purpose and aim</h2>
+  <ul>
+  <li>State the research question or objective.</li>
+  </ul>
+  <h2 id="methodology">Methodology</h2>
+  <ul>
+  <li>Describe the research design, methods and sample size.</li>
+  </ul>
+  <h2 id="key-findings-and-arguments">Key findings and arguments</h2>
+  <ul>
+  <li>Summarise the main results and conclusions.</li>
+  </ul>
+  <h2 id="relevance">Relevance</h2>
+  <ul>
+  <li>Explain how it links to the research questions or framework.</li>
+  </ul>
+  <h2 id="project-integration">Project integration</h2>
+  <ul>
+  <li><strong>Why it helps the project (evidence-linked)</strong>
+  <ul>
+  <li>What concrete evidence from the paper strengthens the project?
+  Cite inline (for example, <code>[@citationKey]</code>) and add page
+  references for specifics.<br />
+  </li>
+  </ul></li>
+  <li><strong>Hooks into the project</strong>
+  <ul>
+  <li>Which workstream, deliverable, decision or stakeholder does this
+  inform?<br />
+  </li>
+  </ul></li>
+  <li><strong>Use across the methods spine</strong>
+  <ul>
+  <li>Tick where this source is most useful:
+  <ul>
+  <li><code>[ ]</code> Framing and theory<br />
+  </li>
+  <li><code>[ ]</code> Study design<br />
+  </li>
+  <li><code>[ ]</code> Data collection and instruments<br />
+  </li>
+  <li><code>[ ]</code> Analysis and models<br />
+  </li>
+  <li><code>[ ]</code> Synthesis and interpretation<br />
+  </li>
+  <li><code>[ ]</code> Reporting and communications</li>
+  </ul></li>
+  </ul></li>
+  </ul>
+  <h2 id="critical-evaluation">Critical evaluation</h2>
+  <ul>
+  <li><strong>Strengths</strong>
+  <ul>
+  <li>What is robust here?<br />
+  </li>
+  <li>Any novel contributions?<br />
+  </li>
+  </ul></li>
+  <li><strong>Weaknesses and limitations</strong>
+  <ul>
+  <li>Flaws, gaps or biases?<br />
+  </li>
+  <li>Anything the study overlooks?<br />
+  </li>
+  </ul></li>
+  <li><strong>Author’s credibility</strong>
+  <ul>
+  <li>Credentials, affiliations, track record?<br />
+  </li>
+  </ul></li>
+  <li><strong>Contextual validity</strong>
+  <ul>
+  <li>Does it generalise beyond the sample or context studied?<br />
+  </li>
+  </ul></li>
+  <li><strong>Comparisons</strong>
+  <ul>
+  <li>How does it align or conflict with other studies?</li>
+  </ul></li>
+  </ul>
+  <h2 id="interpretation">Interpretation</h2>
+  <ul>
+  <li><strong>Your own insights</strong>
+  <ul>
+  <li>Alternative explanations?<br />
+  </li>
+  <li>Implications for practice, policy or theory?<br />
+  </li>
+  <li>How does it shape your thinking?</li>
+  </ul></li>
+  </ul>
+  <h2 id="evidence-to-quote-or-paraphrase">Evidence to quote or
+  paraphrase</h2>
+  <ul>
+  <li>‘<Quote>’ (page X)</li>
+  </ul>
+  <h2 id="related-works">Related works</h2>
+  <ul>
+  <li>List directly cited or conceptually linked papers.</li>
+  </ul>
+  <h2 id="questions-for-further-research">Questions for further
+  research</h2>
+  <ul>
+  <li>What unanswered questions remain?<br />
+  </li>
+  <li>What should you follow up next?</li>
+  </ul>
+  </main>
+</div>
 
 <script>
-  // Put the file’s modified date under the authors line
+  // Put the file’s modified date under the title
   (function () {
     var el = document.getElementById('last-updated');
     if (el) el.textContent = new Date(document.lastModified)
