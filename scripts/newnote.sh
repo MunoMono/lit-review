@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create a new reading note from a citekey (or DOI/URL) using the project template.
+# Create a new reading note from a citekey, DOI or URL using the project template.
 set -euo pipefail
 umask 022
 
@@ -100,76 +100,68 @@ tpl = textwrap.dedent(f"""\
     link-citations: true
     ---
 
-    ## Purpose/aim
-    - **What research question or objective is being addressed?**  
+    ## Purpose and aim
+    - State the research question or objective.
 
     ## Methodology
-    - **Research design, methods and sample size.**  
+    - Describe the research design, methods and sample size.
 
     ## Key findings and arguments
-    - **Main results and conclusions.**    
+    - Summarise the main results and conclusions.
 
     ## Relevance
-    - **How does it link to the research questions or framework?**  
+    - Explain how it links to the research questions or framework.
 
     ## Project integration
     - **Why it helps the project (evidence-linked)**  
-      - What concrete evidence from the paper strengthens the project? Cite inline (e.g., ``[@{citekey}]``) and add page refs for specifics.  
+      - What concrete evidence from the paper strengthens the project? Cite inline (for example, ``[@{citekey}]``) and add page references for specifics.  
     - **Hooks into the project**  
-      - Which workstream, deliverable, decision, or stakeholder does this inform?  
+      - Which workstream, deliverable, decision or stakeholder does this inform?  
     - **Use across the methods spine**  
       - Tick where this source is most useful:  
-        - `[ ]` Framing/theory  
+        - `[ ]` Framing and theory  
         - `[ ]` Study design  
-        - `[ ]` Data collection/instruments  
-        - `[ ]` Analysis/models  
-        - `[ ]` Synthesis/interpretation  
-        - `[ ]` Reporting/comms
+        - `[ ]` Data collection and instruments  
+        - `[ ]` Analysis and models  
+        - `[ ]` Synthesis and interpretation  
+        - `[ ]` Reporting and communications
 
     ## Critical evaluation
     - **Strengths**  
       - What is robust here?  
       - Any novel contributions?  
-    - **Weaknesses/limitations**  
-      - Flaws, gaps, or biases?  
+    - **Weaknesses and limitations**  
+      - Flaws, gaps or biases?  
       - Anything the study overlooks?  
-    - **Author's credibility**  
+    - **Author’s credibility**  
       - Credentials, affiliations, track record?  
     - **Contextual validity**  
-      - Does it generalise beyond the sample/context studied?  
+      - Does it generalise beyond the sample or context studied?  
     - **Comparisons**  
-      - How does it align or conflict with other studies?  
+      - How does it align or conflict with other studies?
 
     ## Interpretation
     - **Your own insights**  
       - Alternative explanations?  
-      - Implications for practice, policy, or theory?  
-      - How does it shape your thinking?  
+      - Implications for practice, policy or theory?  
+      - How does it shape your thinking?
 
-    ## Evidence to quote/paraphrase
-    - "<Quote>" (p. X)
+    ## Evidence to quote or paraphrase
+    - ‘<Quote>’ (page X)
 
     ## Related works
-    - **Directly cited or conceptually linked papers.**
+    - List directly cited or conceptually linked papers.
 
     ## Questions for further research
-    - **What unanswered questions remain?**  
-    - **What should you follow up next?**
+    - What unanswered questions remain?  
+    - What should you follow up next?
     """)
 
 out.write_text(tpl, encoding="utf-8")
 print(str(out))
 PY
 
-NEW_PATH="$(tail -n1 <<<"$("$SHELL" -lc 'true')")"  # no-op to keep shells happy
-# The python above prints the created (or existing) path on the last line.
-# Capture it via command substitution instead:
-CREATED_PATH="$(python3 - "$BIB_PATH" "$NOTES_DIR" "$IDENT" "$CSL_STYLE" <<'PY'
-print("This line should never print")  # placeholder; replaced above
-PY
-)"
-
-# Actually, we already printed from Python. Just build if requested:
+# Build immediately if requested
 if [[ $DO_BUILD -eq 1 ]]; then
   ./scripts/build-notes.sh
 fi
