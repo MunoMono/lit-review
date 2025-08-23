@@ -14,33 +14,33 @@ link-citations: true
 - **What research question or objective is being addressed?**  
 
 ## Methodology
-- **Research design, methods, and sample size.**  
+- **Research design, methods and sample size.**  
 
 ## Key findings and arguments
 - **Main results and conclusions.**    
 
 ## Relevance
-- **How does it link to your own research questions or framework?**  
+- **How does it link to the research questions or framework?**  
 
 ## Project integration
 - **Why it helps the project (evidence-linked)**  
-  - What concrete evidence from the paper strengthens our project? Cite inline (e.g., ``[@citationKey]``) and add page refs for specifics.  
+  - What concrete evidence from the paper strengthens the project? Cite inline (e.g., ``[@citationKey]``) and add page refs for specifics.  
 - **Hooks into the project**  
   - Which workstream, deliverable, decision, or stakeholder does this inform?  
 - **Use across the methods spine**  
   - Tick where this source is most useful:  
-    - `[ ]` Framing / theory  
+    - `[ ]` Framing/theory  
     - `[ ]` Study design  
-    - `[ ]` Data collection / instruments  
-    - `[ ]` Analysis / models  
-    - `[ ]` Synthesis / interpretation  
-    - `[ ]` Reporting / comms
+    - `[ ]` Data collection/instruments  
+    - `[ ]` Analysis/models  
+    - `[ ]` Synthesis/interpretation  
+    - `[ ]` Reporting/comms
 
 ## Critical evaluation
 - **Strengths**  
   - What is robust here?  
   - Any novel contributions?  
-- **Weaknesses / limitations**  
+- **Weaknesses/limitations**  
   - Flaws, gaps, or biases?  
   - Anything the study overlooks?  
 - **Author's credibility**  

@@ -46,12 +46,12 @@ and structural shifts.
   - Deliverables/decisions: archive prioritisation; remote-access requirements; text-mining stack; doc standards for provenance.  
   - Stakeholders: GLAM partners, PI/co-Is, data stewards, PG researchers.  
 - **Use across the methods spine**  
-  - `[x]` Framing / theory  
+  - `[x]` Framing/theory  
   - `[x]` Study design  
-  - `[x]` Data collection / instruments  
-  - `[x]` Analysis / models  
-  - `[x]` Synthesis / interpretation  
-  - `[x]` Reporting / comms
+  - `[x]` Data collection/instruments  
+  - `[x]` Analysis/models  
+  - `[x]` Synthesis/interpretation  
+  - `[x]` Reporting/comms
 
 ## Critical evaluation
 **Strengths**
@@ -59,7 +59,7 @@ and structural shifts.
 - Balanced tone: acknowledges opportunities without technological determinism.  
 - Identifies structural barriers (career incentives, infrastructure) rather than blaming individual scholars.  
 
-**Weaknesses / limitations**
+**Weaknesses/limitations**
 - Small sample size (22 survey respondents; 33 interviews) — limits generalisability.  
 - Respondents skew toward those already engaged in DH/archives; may underrepresent resistant or marginal voices.  
 - Limited theorisation: descriptive mapping of obstacles, but little engagement with broader epistemology.  
@@ -84,7 +84,7 @@ and structural shifts.
 - Supports my review strategy: instead of surveying tools, I critique the **conditions of possibility** for computational methods.  
 - Suggests that DDR methods, if re-evaluated, must account not only for methodological validity but for **infrastructural readiness and institutional culture**.  
 
-## Key quotes
+## Evidence to quote/paraphrase
 - “Computational methods are often not embedded in the training of early career researchers, leaving them to rely on self-teaching or ad hoc workshops.” (p. X)  
 - “Born-digital and digitised collections are rarely AI-ready; they require pre-processing, cleaning, and metadata creation that most archives are ill-equipped to provide.” (p. X)  
 - “The solo-researcher model of the humanities is at odds with the collaborative demands of computational projects.” (p. X)  

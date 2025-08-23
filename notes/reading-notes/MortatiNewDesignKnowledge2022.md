@@ -42,19 +42,19 @@ link-citations: true
   - Deliverables/decisions: service metrics emphasize **learning velocity** and harm reduction; representation standards for systemic maps and scenario artifacts.  
   - Stakeholders: design, data science, policy/ethics, affected communities, and operators of algorithmic systems.  
 - **Use across the methods spine**  
-  - `[x]` Framing / theory  
+  - `[x]` Framing/theory  
   - `[x]` Study design  
-  - `[x]` Data collection / instruments  
-  - `[x]` Analysis / models  
-  - `[x]` Synthesis / interpretation  
-  - `[x]` Reporting / comms
+  - `[x]` Data collection/instruments  
+  - `[x]` Analysis/models  
+  - `[x]` Synthesis/interpretation  
+  - `[x]` Reporting/comms
 
 ## Critical evaluation
 **Strengths**
 - Frames design knowledge production within broader societal and institutional logics—important corrective to insular design methods discourse.  
 - Concept of the fifth order is generative: it opens space for reinterpreting design as knowledge infrastructure.  
 
-**Weaknesses / limitations**
+**Weaknesses/limitations**
 - Stays at a conceptual level: lacks empirical grounding or demonstration of how “fifth order” operates in practice.  
 - Risks abstraction: without methodological exemplars, difficult to test or apply.  
 
@@ -75,7 +75,7 @@ link-citations: true
 - Suggests my contribution is not only methodological (re-testing DDR models) but also epistemological: **what counts as design knowledge, and why**.  
 - Supports my critical stance: I am reviewing, not surveying—positioning DDR models within broader debates on legitimacy, reflexivity, and knowledge politics.
 
-## Key quotes
+## Evidence to quote/paraphrase
 - “The fifth order of design concerns itself with the production, legitimation, and circulation of design knowledge.” (p. X)  
 - “Design knowledge must be made explicit, reflexive, and socially accountable.” (p. X)  
 

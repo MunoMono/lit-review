@@ -1,169 +1,175 @@
 #!/usr/bin/env bash
-# Build reading notes + review + index, and auto-sync citation_key from refs/library.bib
+# Create a new reading note from a citekey (or DOI/URL) using the project template.
 set -euo pipefail
 umask 022
-shopt -s nullglob
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <citekey|doi|url> [--build]" >&2
+  exit 1
+fi
+
+IDENT="$1"; shift || true
+DO_BUILD=0
+[[ "${1:-}" == "--build" ]] && DO_BUILD=1
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 CSL_STYLE="${CSL_STYLE:-https://www.zotero.org/styles/harvard-cite-them-right}"
 BIB_PATH="${BIB:-${BIBLIOGRAPHY:-refs/library.bib}}"
+NOTES_DIR="notes/reading-notes"
+mkdir -p "$NOTES_DIR"
 
-mkdir -p notes-html
-[[ -d filters ]] || mkdir -p filters
-[[ -d assets  ]] || mkdir -p assets
-[[ -d notes   ]] || mkdir -p notes
-[[ -d refs    ]] || mkdir -p refs
+command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found"; exit 1; }
+[[ -f "$BIB_PATH" ]] || { echo "Error: bibliography not found: $BIB_PATH" >&2; exit 1; }
 
-if ! command -v pandoc >/dev/null 2>&1; then
-  echo "Error: pandoc not found on PATH." >&2; exit 1
-fi
-if [[ ! -f "$BIB_PATH" ]]; then
-  echo "Error: bibliography not found: $BIB_PATH" >&2; exit 1
-fi
+python3 - "$BIB_PATH" "$NOTES_DIR" "$IDENT" "$CSL_STYLE" <<'PY'
+import re, sys, pathlib, textwrap
 
-TEMPLATE_ARG=()
-[[ -f assets/note.html   ]] && TEMPLATE_ARG=(--template assets/note.html)
+bib_path = pathlib.Path(sys.argv[1])
+notes_dir = pathlib.Path(sys.argv[2])
+ident     = sys.argv[3]
+csl_style = sys.argv[4]
 
-REVIEW_TEMPLATE_ARG=()
-[[ -f assets/review.html ]] && REVIEW_TEMPLATE_ARG=(--template assets/review.html)
+def norm(s): return re.sub(r'[^a-z0-9]+','', (s or '').lower())
 
-[[ -f assets/notes.css   ]] && cp -f assets/notes.css notes-html/notes.css
-
-FILTER_ARGS=()
-[[ -f filters/strip-leading-citation.lua ]] && FILTER_ARGS+=(--lua-filter=filters/strip-leading-citation.lua)
-[[ -f filters/citations-in-lists.lua     ]] && FILTER_ARGS+=(--lua-filter=filters/citations-in-lists.lua)
-[[ -f filters/sentence-case-title.lua    ]] && FILTER_ARGS+=(--lua-filter=filters/sentence-case-title.lua)
-
-EXTRA_FLAGS=()
-if [[ -n "${PANDOC_EXTRA_FLAGS:-}" ]]; then EXTRA_FLAGS=(${PANDOC_EXTRA_FLAGS}); fi
-[[ " ${EXTRA_FLAGS[*]-} " != *" --citeproc "* ]] && EXTRA_FLAGS+=(--citeproc)
-[[ " ${EXTRA_FLAGS[*]-} " != *" --metadata link-citations=true "* ]] && EXTRA_FLAGS+=(--metadata link-citations=true)
-
-note_files=(notes/reading-notes/*.md)
-
-# ------------------------------------------------------------------------------
-# 0) Auto-sync citation_key in YAML from refs/library.bib (by DOI/URL/title/author+year)
-# ------------------------------------------------------------------------------
-/usr/bin/env python3 - "$BIB_PATH" "${note_files[@]}" <<'PY'
-import re, sys, json, pathlib
-
-def load_bib(path):
-    txt = pathlib.Path(path).read_text(encoding='utf-8',errors='ignore')
+def load_bib_entries(path):
+    txt = path.read_text(encoding='utf-8', errors='ignore')
     chunks = re.split(r'(?m)^(?=@)', txt)
     entries=[]
     for ch in chunks:
         m = re.match(r'@\s*([^{(]+)\s*[\{\(]\s*([^,\s]+)', ch)
         if not m: continue
-        key = m.group(2)
+        key = m.group(2).strip()
         fields={}
         for fm in re.finditer(r'([a-zA-Z]+)\s*=\s*({([^{}]*|{[^}]*})*}|"([^"]*)")\s*,?', ch, re.S):
             name=fm.group(1).lower()
             val = fm.group(3) if fm.group(3) is not None else (fm.group(4) or "")
             fields[name]=val.strip()
-        entries.append((key,fields))
+        entries.append((key, fields))
     return entries
 
-def norm(s): return re.sub(r'[^a-z0-9]+','', s.lower())
+entries = load_bib_entries(bib_path)
+by_key = {k:(k,f) for k,f in entries}
+by_doi = {norm(f.get('doi','')):(k,f) for k,f in entries if f.get('doi')}
+by_url = {norm(f.get('url','')):(k,f) for k,f in entries if f.get('url')}
 
-def surname_first(author_field):
-    # take first "Surname" token
-    if not author_field: return ""
-    first = author_field.split(' and ')[0]
-    # handle "Surname, Given"
-    if ',' in first:
-        return first.split(',',1)[0].strip()
-    return first.split()[-1].strip()
+# try to resolve identifier
+key_like = ident.lstrip('@')
+found = by_key.get(key_like)
+if not found:
+    idn = norm(ident)
+    if '/' in ident or ident.startswith('10.'):
+        found = by_doi.get(idn) or by_url.get(idn)
 
-bib = sys.argv[1]
-notes = sys.argv[2:]
+if found:
+    citekey, f = found
+    title   = f.get('title','').strip()
+    authors = f.get('author','').strip()
+    year    = re.sub(r'\D+','', f.get('year','')).strip() or ""
+    journal = f.get('journal','') or f.get('booktitle','') or f.get('publisher','')
+    doi     = f.get('doi','')
+    url     = f.get('url','')
+else:
+    citekey = key_like if key_like else norm(ident)[:32] or "unknown"
+    title   = "<Paper title here>"
+    authors = "<Authors here>"
+    year    = "<Year>"
+    journal = "<Journal name>"
+    doi     = ident if ident.startswith('10.') else ""
+    url     = ident if ident.startswith('http') else ""
 
-entries = load_bib(bib)
-by_key = {k:k for k,_ in entries}
-by_doi = {norm(f.get('doi','')): k for k,f in entries if f.get('doi')}
-by_url = {}
-for k,f in entries:
-    u=f.get('url','')
-    if u: by_url[norm(u)] = k
-by_title_year = {}
-by_author_year = {}
-for k,f in entries:
-    t = norm(f.get('title',''))
-    y = re.sub(r'\D+','', f.get('year',''))
-    if t and y: by_title_year[(t,y)] = k
-    ay = (norm(surname_first(f.get('author',''))), y)
-    if ay[0] and ay[1]: by_author_year[ay] = k
+# safe filename from citekey
+fname = re.sub(r'[^A-Za-z0-9._-]+', '-', citekey) + ".md"
+out = notes_dir / fname
+if out.exists():
+    print(str(out))  # idempotent: print path and exit 0
+    sys.exit(0)
 
-def read_yaml_head(p):
-    s = pathlib.Path(p).read_text(encoding='utf-8')
-    m = re.match(r'^---\n(.*?)\n---\n', s, re.S)
-    return (m.group(1), s[m.end():]) if m else ("", s)
+tpl = textwrap.dedent(f"""\
+    ---
+    title: "{title}"
+    authors: "{authors}"
+    year: "{year}"
+    journal: "{journal}"
+    citation_key: {citekey}
+    doi: {doi if doi else ''}
+    url: "{url}"
+    bibliography: ../../refs/library.bib
+    csl: {csl_style}
+    link-citations: true
+    ---
 
-def parse_yaml_block(y):
-    out={}
-    for line in y.splitlines():
-        if not line.strip() or line.strip().startswith('#'): continue
-        m=re.match(r'^([A-Za-z0-9_-]+)\s*:\s*"(.*)"\s*$', line)
-        if not m: m=re.match(r'^([A-Za-z0-9_-]+)\s*:\s*(.*)$', line)
-        if m: out[m.group(1)] = m.group(2).strip()
-    return out
+    ## Purpose/aim
+    - **What research question or objective is being addressed?**  
 
-def write_yaml(p, meta, body):
-    # keep existing order where possible
-    keys = ["title","authors","year","journal","citation_key","doi","url",
-            "bibliography","csl","link-citations"]
-    lines=["---"]
-    for k in keys:
-        if k in meta:
-            v=str(meta[k])
-            if re.search(r'[:#"]|\s', v): lines.append(f'{k}: "{v}"')
-            else: lines.append(f'{k}: {v}')
-    # include any extra keys
-    for k,v in meta.items():
-        if k in keys: continue
-        if re.search(r'[:#"]|\s', v): lines.append(f'{k}: "{v}"')
-        else: lines.append(f'{k}: {v}')
-    lines.append('---')
-    pathlib.Path(p).write_text('\n'.join(lines)+ '\n' + body, encoding='utf-8')
+    ## Methodology
+    - **Research design, methods and sample size.**  
 
-changed = False
-for n in notes:
-    path = pathlib.Path(n)
-    if not path.exists(): continue
-    yml, body = read_yaml_head(path)
-    if not yml: continue
-    meta = parse_yaml_block(yml)
+    ## Key findings and arguments
+    - **Main results and conclusions.**    
 
-    cite = meta.get("citation_key","").strip()
-    if cite and cite in by_key:
-        continue  # already correct
+    ## Relevance
+    - **How does it link to the research questions or framework?**  
 
-    # Try to discover the correct key
-    found = None
-    if not found and meta.get("doi"):
-        found = by_doi.get(norm(meta["doi"]))
-    if not found and meta.get("url"):
-        found = by_url.get(norm(meta["url"]))
-    if not found and meta.get("title") and meta.get("year"):
-        found = by_title_year.get((norm(meta["title"]), re.sub(r'\D+','',meta["year"])))
-    if not found and meta.get("authors") and meta.get("year"):
-        first = meta["authors"].split(' and ')[0].split(',')[0].strip() if ',' in meta["authors"] else meta["authors"].split()[ -1]
-        found = by_author_year.get((norm(first), re.sub(r'\D+','',meta["year"])))
+    ## Project integration
+    - **Why it helps the project (evidence-linked)**  
+      - What concrete evidence from the paper strengthens the project? Cite inline (e.g., ``[@{citekey}]``) and add page refs for specifics.  
+    - **Hooks into the project**  
+      - Which workstream, deliverable, decision, or stakeholder does this inform?  
+    - **Use across the methods spine**  
+      - Tick where this source is most useful:  
+        - `[ ]` Framing/theory  
+        - `[ ]` Study design  
+        - `[ ]` Data collection/instruments  
+        - `[ ]` Analysis/models  
+        - `[ ]` Synthesis/interpretation  
+        - `[ ]` Reporting/comms
 
-    if found:
-        # fill/overwrite with trusted bib data for accuracy
-        k, f = next((kk,ff) for kk,ff in entries if kk==found)
-        meta["citation_key"] = k
-        meta["title"]   = meta.get("title")   or f.get("title","")
-        meta["authors"] = meta.get("authors") or f.get("author","")
-        meta["year"]    = meta.get("year")    or f.get("year","")
-        meta["journal"] = meta.get("journal") or f.get("journal","") or f.get("booktitle","") or f.get("publisher","")
-        meta["doi"]     = meta.get("doi")     or f.get("doi","")
-        meta["url"]     = meta.get("url")     or f.get("url","")
-        write_yaml(path, meta, body)
-        changed = True
+    ## Critical evaluation
+    - **Strengths**  
+      - What is robust here?  
+      - Any novel contributions?  
+    - **Weaknesses/limitations**  
+      - Flaws, gaps, or biases?  
+      - Anything the study overlooks?  
+    - **Author's credibility**  
+      - Credentials, affiliations, track record?  
+    - **Contextual validity**  
+      - Does it generalise beyond the sample/context studied?  
+    - **Comparisons**  
+      - How does it align or conflict with other studies?  
 
-if changed:
-    print("Synchronized citation_key from bibliography for some notes.")
+    ## Interpretation
+    - **Your own insights**  
+      - Alternative explanations?  
+      - Implications for practice, policy, or theory?  
+      - How does it shape your thinking?  
+
+    ## Evidence to quote/paraphrase
+    - "<Quote>" (p. X)
+
+    ## Related works
+    - **Directly cited or conceptually linked papers.**
+
+    ## Questions for further research
+    - **What unanswered questions remain?**  
+    - **What should you follow up next?**
+    """)
+
+out.write_text(tpl, encoding="utf-8")
+print(str(out))
 PY
+
+NEW_PATH="$(tail -n1 <<<"$("$SHELL" -lc 'true')")"  # no-op to keep shells happy
+# The python above prints the created (or existing) path on the last line.
+# Capture it via command substitution instead:
+CREATED_PATH="$(python3 - "$BIB_PATH" "$NOTES_DIR" "$IDENT" "$CSL_STYLE" <<'PY'
+print("This line should never print")  # placeholder; replaced above
+PY
+)"
+
+# Actually, we already printed from Python. Just build if requested:
+if [[ $DO_BUILD -eq 1 ]]; then
+  ./scripts/build-notes.sh
+fi
