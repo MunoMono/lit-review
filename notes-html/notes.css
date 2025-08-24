@@ -1,9 +1,10 @@
 /* Load IBM Plex for pages that don't inject a <link> (e.g., generated index) */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
 /* =========================================================
    Carbon-ish typography: IBM Plex + expressive type scale
    ========================================================= */
-:root{
+:root {
   --cds-font-sans: 'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
   --cds-font-serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
   --cds-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -40,12 +41,12 @@
   --cds-quotation-01-size: 1.5rem;    /* 24px */
   --cds-quotation-01-line: 1.25;      /* 30px */
 
-  /* Colors */
-  --cds-text-100: #161616;   /* Gray 100 */
-  --cds-text-70:  #525252;   /* Gray 70 */
-  --cds-border:   #e0e0e0;
-  --cds-bg-subtle:#f4f4f4;
-  --cds-link:     #0f62fe;   /* IBM Blue 60 */
+  /* Dark theme (Carbon G90) */
+  --cds-text-100: #ffffff;   /* White text */
+  --cds-text-70:  #c6c6c6;   /* Gray 30 for secondary text */
+  --cds-border:   #525252;   /* Gray 70 */
+  --cds-bg-subtle:#393939;   /* Gray 80 for blocks/code */
+  --cds-link:     #78a9ff;   /* Blue 40 (accessible on dark) */
 }
 
 /* Scope Carbon type to document content */
@@ -89,7 +90,11 @@
 /* Paragraphs, captions */
 .cds-prose p { margin: 0 0 1rem; }
 .cds-prose small,
-.cds-prose .caption { font: 400 var(--cds-body-long-01-size)/var(--cds-body-long-01-line) var(--cds-font-sans); letter-spacing: .16px; color: var(--cds-text-70); }
+.cds-prose .caption { 
+  font: 400 var(--cds-body-long-01-size)/var(--cds-body-long-01-line) var(--cds-font-sans); 
+  letter-spacing: .16px; 
+  color: var(--cds-text-70); 
+}
 
 /* Links */
 .cds-prose a { color: var(--cds-link); text-decoration: none; }
@@ -98,7 +103,11 @@
 /* Quotes use Plex Serif */
 .cds-prose blockquote {
   font: 400 var(--cds-quotation-01-size)/var(--cds-quotation-01-line) var(--cds-font-serif);
-  margin: 1rem 0; padding: .25rem 1rem; border-left: 4px solid #8d8d8d; color: #393939; background: #fafafa;
+  margin: 1rem 0; 
+  padding: .25rem 1rem; 
+  border-left: 4px solid var(--cds-border); 
+  color: var(--cds-text-100); 
+  background: var(--cds-bg-subtle);
 }
 
 /* Code uses Plex Mono */
@@ -110,8 +119,28 @@
 .cds-prose ul, .cds-prose ol { margin: 0 0 1rem 1.25rem; }
 .cds-prose li { margin: .25rem 0; }
 .cds-prose table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
-.cds-prose th, .cds-prose td { border: 1px solid var(--cds-border); padding: .5rem; text-align: left; }
-.cds-prose thead th { background: #fafafa; }
+.cds-prose th, .cds-prose td { border: 1px solid var(--cds-border); padding: .5rem; text-align: left; color: var(--cds-text-100); }
+.cds-prose thead th { background: #393939; }
+
+/* Carbon-style dash bullets */
+.cds-prose ul,
+ul {
+  list-style: none;
+  margin-left: 1.25rem;
+  padding-left: 0;
+}
+.cds-prose ul li,
+ul li {
+  position: relative;
+  padding-left: 1rem;
+}
+.cds-prose ul li::before,
+ul li::before {
+  content: "–"; /* en-dash */
+  position: absolute;
+  left: 0;
+  color: var(--cds-text-100);
+}
 
 /* Citations & references */
 .cds-prose .citation a { text-decoration: none; color: inherit; border-bottom: 0; }
@@ -132,12 +161,14 @@
 .cds-prose #TOC a:hover { text-decoration: underline; }
 
 /* =========================================================
-   Existing base layout (kept, lightly tuned to coexist)
+   Base layout
    ========================================================= */
 html { box-sizing: border-box; }
 *, *::before, *::after { box-sizing: inherit; }
 
 body {
+  background: #262626; /* Carbon G90 */
+  color: var(--cds-text-100);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -160,7 +191,7 @@ body {
 .top-nav a { text-decoration: none; color: inherit; }
 .top-nav a:hover { text-decoration: underline; }
 
-/* Headings spacing extras (work with Carbon mapping above) */
+/* Headings spacing extras */
 h1, h2, h3, h4 { line-height: 1.25; }
 h2 { margin-top: 2rem; }
 h3 { margin-top: 1.5rem; }
@@ -174,13 +205,14 @@ blockquote {
   margin: 1rem 0;
   padding: 0.5rem 1rem;
   border-left: 3px solid var(--cds-border);
-  background: #fafafa;
+  background: var(--cds-bg-subtle);
+  color: var(--cds-text-100);
 }
 
 /* Tables (base) */
 table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
-th, td { border: 1px solid #e5e5e5; padding: 0.5rem; text-align: left; }
-thead th { background: #fafafa; }
+th, td { border: 1px solid var(--cds-border); padding: 0.5rem; text-align: left; color: var(--cds-text-100); }
+thead th { background: #393939; }
 
 /* Utilities */
 img { max-width: 100%; height: auto; }
@@ -189,4 +221,35 @@ hr { border: 0; border-top: 1px solid var(--cds-border); margin: 2rem 0; }
 /* Slightly wider layout on large screens */
 @media (min-width: 900px) {
   body { max-width: 80ch; }
+
+ /* Carbon-style breadcrumb (G90) */
+.cds-breadcrumb {
+  margin: .75rem 0 1rem;
+  font: 400 var(--cds-body-long-01-size)/var(--cds-body-long-01-line) var(--cds-font-sans);
+  color: var(--cds-text-70);
+}
+.cds-breadcrumb ol {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: .25rem;
+}
+.cds-breadcrumb li {
+  display: flex; align-items: center;
+}
+.cds-breadcrumb li + li::before {
+  content: "›"; /* Carbon uses chevron; text fallback works well */
+  opacity: .8;
+  margin: 0 .5rem;
+}
+.cds-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+.cds-breadcrumb a:hover {
+  text-decoration: underline;
+}
+.cds-breadcrumb [aria-current="page"] {
+  color: var(--cds-text-100);
+  font-weight: 600;
+} 
 }
